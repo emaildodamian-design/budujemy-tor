@@ -3,7 +3,7 @@
 // Only same-origin GET requests are ever handled; the app makes no other requests.
 
 const VERSION = '__VERSION__';
-const CACHE = `budujemy-tor-${VERSION}`;
+const CACHE = `budujemy-tor-v2-${VERSION}`;
 const PRECACHE = __PRECACHE__;
 
 self.addEventListener('install', (event) => {

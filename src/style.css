@@ -292,132 +292,213 @@ h3 {
   transform-origin: 32px 32px;
 }
 
+/* ---------- intro & depot scenes (pictures only) ---------- */
+.intro-scene,
+.depot-scene {
+  justify-content: center;
+  gap: 18px;
+}
+.intro-first .card-icon {
+  width: 120px;
+  height: 120px;
+}
+.intro-arrow {
+  width: 60px;
+  height: 40px;
+}
+.intro-arrow path {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.depot-ride {
+  width: 100%;
+  max-width: 520px;
+}
+.depot-scene {
+  transition: filter 1.6s ease;
+}
+.depot-scene.dim {
+  filter: brightness(0.82) saturate(0.85);
+}
+.engine.rolling-home {
+  offset-path: path('M50 50 H450');
+  offset-rotate: 0deg;
+  animation: roll-home 3.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+@keyframes roll-home {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+.hold-start {
+  touch-action: none;
+}
+
 /* ---------- game ---------- */
 .game-root {
   min-height: 100dvh;
 }
 .screen.game {
   gap: 8px;
-  padding-top: max(10px, env(safe-area-inset-top));
+  padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));
   touch-action: none;
+  position: relative;
 }
-.turnbar {
+.topbar {
   width: 100%;
-  padding: 8px 6px 0;
+  height: 76px;
+  flex: none;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
 }
-.turnbar-mid {
+.topbar-mid {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  min-width: 0;
+  gap: 6px;
 }
-.status {
-  margin: 0;
-  min-height: 1.3em;
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-  text-align: center;
-}
-.avatar {
-  position: relative;
-  width: 64px;
-  height: 64px;
+.pause-ctl {
+  align-self: flex-start;
+  width: 40px;
+  height: 40px;
   flex: none;
-  border-radius: 50%;
-  opacity: 0.4;
-  transform: scale(0.85);
-  transition:
-    transform 600ms ease,
-    opacity 600ms ease,
-    box-shadow 600ms ease;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  opacity: 0.35;
+  padding: 0;
+  touch-action: none;
 }
-.avatar-art {
-  width: 100%;
-  height: 100%;
+.pause-svg rect {
+  fill: var(--ink-soft);
 }
-.avatar.active {
-  opacity: 1;
-  transform: scale(1.08);
-}
-.avatar.child.active {
-  box-shadow: 0 0 0 6px var(--child-soft);
-}
-.avatar.parent.active {
-  box-shadow: 0 0 0 6px var(--parent-soft);
-}
-.fill-child {
-  fill: var(--child);
-}
-.fill-parent {
-  fill: var(--parent);
-}
-.fill-child-soft {
-  fill: var(--child-soft);
-}
-.fill-parent-soft {
-  fill: var(--parent-soft);
-}
-.countdown {
-  position: absolute;
-  inset: -8px;
-  width: calc(100% + 16px);
-  height: calc(100% + 16px);
-  transform: rotate(-90deg);
-  pointer-events: none;
-}
-.countdown circle {
-  fill: none;
-  stroke: var(--ink-soft);
-  opacity: 0.55;
-  stroke-width: 5;
-  stroke-linecap: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: fill-ring var(--wait) linear forwards;
-}
-@keyframes fill-ring {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
 .wagons {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   justify-content: center;
-  flex-wrap: nowrap;
 }
 .wagon {
-  width: 20px;
-  height: 14px;
+  width: 28px;
+  height: 20px;
   transition:
     opacity 900ms ease,
-    transform 900ms ease,
-    width 900ms ease 400ms;
+    transform 1100ms ease,
+    width 700ms ease 700ms;
+}
+.wagon-body {
+  fill: var(--child);
 }
 .wagon-art {
   width: 100%;
   height: 100%;
   display: block;
 }
-.wagon.current {
-  transform: translateY(-3px);
-}
-.wagon.gone {
+.wagon.uncouple {
   opacity: 0;
-  transform: translateY(-6px) scale(0.6);
+  transform: translateX(-30px);
   width: 0;
+}
+.goal-strip {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.goal-icon {
+  width: 26px;
+  height: 26px;
+  opacity: 0.35;
+  filter: grayscale(0.7);
+  transition:
+    opacity 500ms ease,
+    filter 500ms ease;
+}
+.goal-icon.lit {
+  opacity: 1;
+  filter: none;
+}
+.goal-icon.missed {
+  animation: soft-pulse 1.6s ease-in-out 3;
+}
+.goal-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.helper {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+}
+.avatar {
+  width: 56px;
+  height: 56px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  border-radius: 50%;
+}
+.avatar-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.lamps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lamp {
+  width: 32px;
+  height: 32px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  transition:
+    transform 600ms ease,
+    opacity 400ms ease;
+}
+.lamp-art {
+  width: 100%;
+  height: 100%;
+}
+.lamp-glow {
+  fill: #fff4c2;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+.lamp-bulb {
+  fill: #fcd34d;
+}
+.lamp-base {
+  fill: #9ca3af;
+}
+.lamp.used {
+  opacity: 0;
+  pointer-events: none;
+}
+/* First tap: the lamp moves onto the parent's avatar and glows. */
+.lamp.armed {
+  transform: translate(-40px, 0) scale(1.2);
+}
+.lamp.armed .lamp-glow {
+  opacity: 0.9;
+}
+.helper.offer .lamp:not(.used) {
+  animation: soft-pulse 1.6s ease-in-out 1;
 }
 
 .board-wrap {
-  width: calc(var(--tile) * 5);
-  height: calc(var(--tile) * 7);
   flex: none;
 }
 .board {
@@ -425,9 +506,7 @@ h3 {
   height: 100%;
   display: block;
   touch-action: none;
-}
-.cell {
-  fill: #ece4d3;
+  overflow: visible;
 }
 .tile-grass {
   fill: var(--grass);
@@ -437,28 +516,61 @@ h3 {
 .tile-water {
   fill: var(--water);
 }
+.wave {
+  fill: none;
+  stroke: #d9eefc;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.mountain {
+  fill: #a8a29e;
+}
+.snow {
+  fill: #fafaf9;
+}
+.rock {
+  fill: #a1a1aa;
+}
+.rock-shade {
+  fill: #8b8b94;
+}
+.house-wall {
+  fill: #fde8c8;
+}
+.house-roof {
+  fill: #d98062;
+}
+.house-door {
+  fill: #9a6b4f;
+}
+.house-window {
+  fill: #bfe3f7;
+}
+.trunk {
+  fill: #9a6b4f;
+}
+.crown {
+  fill: #7fb77e;
+}
+.crown-light {
+  fill: #9fcf8e;
+}
+.shed {
+  fill: #c98f6d;
+}
+.piece-base {
+  fill: #eef6e4;
+  stroke: #cfe3b8;
+  stroke-width: 2;
+}
 .sleepers {
   fill: none;
   stroke: var(--sleeper);
   stroke-width: 46;
   stroke-dasharray: 7 9;
 }
-.bridge-deck {
-  fill: none;
-  stroke: #d8b384;
-  stroke-width: 56;
-}
-.bridge-planks {
-  fill: none;
-  stroke: #b58756;
-  stroke-width: 50;
-  stroke-dasharray: 6 4;
-}
-.bridge-gap {
-  fill: none;
-  stroke: var(--water);
-  stroke-width: 64;
-  stroke-dasharray: 0 34 32 34;
+.fixed .sleepers {
+  stroke: #9c7657;
 }
 .rail {
   fill: none;
@@ -466,13 +578,40 @@ h3 {
   stroke-width: 5;
   stroke-linecap: round;
 }
-.owner-dot {
-  opacity: 0.8;
+.bridge-deck {
+  fill: none;
+  stroke: #d8b384;
+  stroke-width: 62;
+}
+.bridge-side {
+  fill: none;
+  stroke: #9a6b4f;
+  stroke-width: 5;
+}
+.bridge-planks {
+  fill: none;
+  stroke: #b58756;
+  stroke-width: 50;
+  stroke-dasharray: 6 4;
+}
+.tunnel-bed {
+  fill: none;
+  stroke: #78716c;
+  stroke-width: 56;
+}
+.tunnel-portal {
+  fill: #44403c;
 }
 .platform {
   fill: #cbb89a;
 }
-.cell-g.settle > .tile {
+.station-roof {
+  fill: #6aa7c9;
+}
+.station-cell.missed {
+  animation: soft-pulse 1.6s ease-in-out 3;
+}
+.cell-g.settle > .piece {
   animation: settle 500ms ease-out;
   transform-origin: 50px 50px;
 }
@@ -482,41 +621,71 @@ h3 {
     opacity: 0.6;
   }
 }
-.cell-g.needs-fix > .tile {
-  animation: breathe 2.4s ease-in-out infinite;
-  transform-origin: 50px 50px;
+.cell-g.lifted {
+  opacity: 0.3;
 }
-@keyframes breathe {
+.ghost-piece {
+  opacity: 0.38;
+  animation: breathe-ghost 2.4s ease-in-out infinite;
+}
+@keyframes breathe-ghost {
   50% {
-    transform: scale(0.94);
+    opacity: 0.22;
   }
 }
-.target {
+/* Hints and the break cell: soft warm white. Never red, no shake. */
+.hint-mark {
+  fill: rgb(255 250 235 / 0.55);
+  stroke: #fff6dc;
+  stroke-width: 6;
+  animation: soft-pulse 1.8s ease-in-out infinite;
+}
+.hint-outline {
   fill: none;
-  stroke-width: 5;
-  stroke-dasharray: 12 10;
-  opacity: 0.35;
-  transition: opacity 400ms ease;
 }
-.target.child {
-  stroke: var(--child);
+.break-mark {
+  fill: rgb(255 250 235 / 0.5);
+  stroke: #fff8e7;
+  stroke-width: 6;
+  animation: break-glow 4.8s ease-in-out forwards;
 }
-.target.parent {
-  stroke: var(--parent);
+@keyframes break-glow {
+  0%,
+  33%,
+  66% {
+    opacity: 0.2;
+  }
+  16%,
+  50%,
+  83% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.35;
+    fill: none;
+  }
 }
-.target.ready {
-  opacity: 0.9;
-  animation: glow 2.4s ease-in-out infinite;
-}
-.target.hover {
-  stroke-dasharray: none;
-  opacity: 1;
-  animation: none;
-}
-@keyframes glow {
+@keyframes soft-pulse {
   50% {
     opacity: 0.45;
   }
+}
+.roof {
+  opacity: 0.6;
+  transition: opacity 1.2s ease;
+}
+.roof.closed {
+  opacity: 0.9;
+}
+.gate {
+  stroke: #fef3c7;
+  stroke-width: 5;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+.roof.gate-shut .gate {
+  opacity: 1;
 }
 
 .engine .headlight {
@@ -525,6 +694,12 @@ h3 {
 }
 .engine.off .headlight {
   fill: #9ca3af;
+}
+.engine {
+  transition: opacity 400ms ease;
+}
+.engine.fade {
+  opacity: 0;
 }
 .engine .puff {
   fill: #fff;
@@ -539,6 +714,9 @@ h3 {
 .engine.running .puff-2 {
   animation-delay: 1.2s;
 }
+.engine.puffing .puff-0 {
+  animation: puff 1.6s ease-out 1;
+}
 @keyframes puff {
   0% {
     opacity: 0.8;
@@ -549,59 +727,65 @@ h3 {
     transform: translate(-40px, 0) scale(1.6);
   }
 }
-.roof-in {
-  opacity: 0.55;
-  transition: opacity 1.5s ease;
-}
-.roof-in.closed {
-  opacity: 0.85;
-}
 
-/* ---------- tray ---------- */
-.tray {
+/* ---------- bottom bar: tray + go ---------- */
+.bottombar {
   width: 100%;
-  min-height: calc(var(--tile) + 40px);
-  border-radius: 24px;
-  background: var(--panel);
+  height: 84px;
+  flex: none;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px;
-  transition: background 600ms ease;
+  gap: 4px;
+  margin-top: auto;
 }
-[data-player='child'] .tray {
-  background: #fdebd8;
-}
-[data-player='parent'] .tray {
-  background: #dcf0ee;
-}
-.tray-note {
-  margin: 0;
-  font-size: 1.3rem;
-}
-.tray-tiles {
+.tray {
   display: flex;
-  gap: 16px;
+  gap: 4px;
   transition: opacity 600ms ease;
 }
-.tray-tiles.resting,
-.fix-panel.resting {
+.looking .tray,
+.looking .helper {
   opacity: 0.4;
 }
-.tray-tile {
-  width: var(--tile);
-  height: var(--tile);
-  min-width: 64px;
-  min-height: 64px;
-  touch-action: none;
-  cursor: grab;
+.tray-item {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: none;
   border-radius: 16px;
-  transition: opacity 300ms ease;
+  background: var(--panel);
+  touch-action: none;
+  transition:
+    transform 300ms ease,
+    box-shadow 300ms ease,
+    opacity 300ms ease;
 }
-.tray-tile.lifted {
-  opacity: 0.25;
+.tray-item.lifted {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 10px 16px rgb(0 0 0 / 0.14);
+}
+.tray-item.empty {
+  opacity: 0.3;
+}
+.tray-item.hinted {
+  animation: soft-pulse 1.6s ease-in-out infinite;
+}
+.tray-count {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+  pointer-events: none;
 }
 .tile-svg {
   width: 100%;
@@ -609,7 +793,45 @@ h3 {
   display: block;
   pointer-events: none;
 }
-.ghost {
+.go {
+  width: 72px;
+  height: 72px;
+  flex: none;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  background: #fffaf0;
+  box-shadow: 0 0 0 4px var(--parent-soft);
+  transition: opacity 500ms ease;
+}
+.go:disabled {
+  opacity: 0.45;
+}
+.go-svg {
+  width: 100%;
+  height: 100%;
+}
+.go-ring {
+  fill: none;
+  stroke: var(--ink-soft);
+  stroke-width: 4;
+  opacity: 0;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transform: rotate(-90deg);
+  transform-origin: 50px 50px;
+}
+/* Look phase: a soft ring fills around the go button (no numbers). */
+.looking .go-ring {
+  opacity: 0.55;
+  animation: fill-ring var(--look) linear forwards;
+}
+@keyframes fill-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.drag-ghost {
   position: fixed;
   left: 0;
   top: 0;
@@ -618,75 +840,39 @@ h3 {
   filter: drop-shadow(0 8px 10px rgb(0 0 0 / 0.18));
   will-change: transform;
 }
-.ghost.returning {
+.drag-ghost.returning {
   transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.dots {
-  display: flex;
-  gap: 10px;
-}
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--ink-soft);
-  opacity: 0.45;
-  animation: dot-out 600ms ease forwards;
-}
-@keyframes dot-out {
-  to {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-}
 
-/* ---------- fix it together ---------- */
-.fix-panel {
-  position: relative;
-  width: min(100%, 340px);
-  aspect-ratio: 300 / 120;
-  transition: opacity 600ms ease;
+/* ---------- pause (parent) ---------- */
+.pause-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgb(246 239 226 / 0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
 }
-.fix-bridge {
+.pause-art {
+  width: min(80vw, 320px);
+}
+.pause-actions {
+  display: flex;
+  gap: 40px;
+}
+.big-btn {
+  width: 96px;
+  height: 96px;
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+.big-icon {
   width: 100%;
   height: 100%;
-  display: block;
-}
-.fix-bridge .deck {
-  fill: #c9a06e;
-}
-.fix-spot {
-  position: absolute;
-  top: 50%;
-  width: 76px;
-  height: 76px;
-  transform: translate(-50%, -50%);
-  border: none;
-  border-radius: 50%;
-  padding: 6px;
-  background: #fff;
-  touch-action: none;
-  animation: breathe-btn 2.4s ease-in-out infinite;
-}
-.fix-spot.child {
-  left: 38.3%;
-  box-shadow: 0 0 0 5px var(--child-soft);
-}
-.fix-spot.parent {
-  left: 61.7%;
-  box-shadow: 0 0 0 5px var(--parent-soft);
-}
-.fix-spot.done {
-  animation: none;
-  opacity: 0.35;
-}
-.fix-panel.resting .fix-spot {
-  animation: none;
-}
-@keyframes breathe-btn {
-  50% {
-    transform: translate(-50%, -50%) scale(1.06);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -696,10 +882,7 @@ h3 {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
   }
-  .countdown circle {
-    animation-duration: var(--wait) !important;
-  }
-  .dot {
-    animation-duration: 600ms !important;
+  .looking .go-ring {
+    animation-duration: var(--look) !important;
   }
 }
