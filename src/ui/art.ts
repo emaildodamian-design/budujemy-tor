@@ -145,7 +145,7 @@ export function pieceArt(kind: PieceKind | 'station', o: Openings, opts: { movab
   }
   if (kind === 'tunnel') {
     g.append(s('path', { class: 'tunnel-bed', d: pathD(a, b) }));
-    rails(o, g);
+    for (const off of [-14, 14]) g.append(s('path', { class: 'rail tunnel-rail', d: pathD(a, b, off) }));
     for (const d of [a, b]) {
       const rot = [0, 90, 180, 270][d];
       g.append(s('path', { class: 'tunnel-portal', d: 'M22 0 L22 14 Q50 -6 78 14 L78 0 Z', transform: `rotate(${rot} 50 50)` }));
@@ -257,6 +257,7 @@ export function pieceIcon(kind: PieceKind | 'station', o: Openings, cls = 'tile-
   else if (kind === 'tunnel') {
     svg.append(base('tile-grass'));
     svg.append(s('path', { class: 'mountain', d: 'M4 92 L34 22 L52 50 L66 30 L96 92 Z' }));
+    svg.append(s('path', { class: 'snow', d: 'M26 40 L34 22 L42 40 L36 36 Z M60 42 L66 30 L73 44 L67 40 Z' }));
   } else if (kind === 'station') svg.append(base('tile-grass'));
   svg.append(pieceArt(kind, o, { movable: kind === 'straight' || kind === 'curve' }));
   return svg;
@@ -293,12 +294,18 @@ export function continueIcon(): SVGSVGElement {
 export function endIcon(): SVGSVGElement {
   const svg = s('svg', { viewBox: '0 0 100 100', class: 'big-icon', 'aria-hidden': 'true' });
   svg.append(s('circle', { cx: 50, cy: 50, r: 46, fill: '#e9dcc3' }));
-  const d = depotIcon();
-  d.setAttribute('x', '20');
-  d.setAttribute('y', '18');
-  d.setAttribute('width', '60');
-  d.setAttribute('height', '60');
-  svg.append(d);
+  svg.append(s('path', { d: 'M24 76 V46 L50 26 L76 46 V76 Z', fill: '#b5654a' }));
+  svg.append(s('path', { d: 'M38 76 V58 Q50 48 62 58 V76 Z', fill: '#5b3a2e' }));
+  return svg;
+}
+
+/** Goal-strip station: a little station house with a platform. */
+export function stationIcon(): SVGSVGElement {
+  const svg = s('svg', { viewBox: '0 0 100 100', class: 'goal-svg', 'aria-hidden': 'true' });
+  svg.append(s('rect', { x: 8, y: 74, width: 84, height: 14, rx: 4, fill: '#cbb89a' }));
+  svg.append(s('rect', { x: 22, y: 38, width: 56, height: 36, rx: 3, fill: '#fde8c8' }));
+  svg.append(s('path', { d: 'M14 42 L50 14 L86 42 Z', fill: '#6aa7c9' }));
+  svg.append(s('rect', { x: 43, y: 52, width: 14, height: 22, rx: 3, fill: '#9a6b4f' }));
   return svg;
 }
 

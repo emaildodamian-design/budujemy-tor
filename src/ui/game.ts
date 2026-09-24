@@ -25,6 +25,7 @@ import {
   pieceArt,
   pieceIcon,
   startArt,
+  stationIcon,
   terrainArt,
   wagonArt,
 } from './art';
@@ -123,7 +124,7 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
   }
   for (let i = 0; i < b.stations.length; i++) want.push('station');
   for (const k of want) {
-    const el = h('span', { class: `goal-icon g-${k}` }, pieceIcon(k, 'EW', 'goal-svg'));
+    const el = h('span', { class: `goal-icon g-${k}` }, k === 'station' ? stationIcon() : pieceIcon(k, 'EW', 'goal-svg'));
     goalIcons.push({ kind: k, el });
     goal.append(el);
   }
