@@ -24,7 +24,9 @@ The contract is [`SPEC.md`](SPEC.md). The PR description tracks done / not done 
 5. **Ride**: the train rolls slowly along the whole track once, into the depot, and switches off
    (smoke stops, headlight dims).
 6. **END**: "Koniec. Teraz: [card]". No play-again button. Until tomorrow the app shows
-   "Tor na dziś gotowy". A parent can override by holding the lock button for 3 seconds.
+   "Tor na dziś gotowy". A parent can unlock early by holding the big heading at the top of the
+   END or locked screen for 3 seconds. There is no visible button (so a child has nothing to find);
+   the setup screen tells the parent where to hold.
 
 ## Run locally
 
@@ -88,7 +90,7 @@ without a browser. The UI in `src/ui/` only draws and forwards input.
 | Broken bridge 1–2× | Scheduled at session start on the parent's 2nd–5th turn (never the first or the last parent turn; two bridges are never back to back). |
 | "both tap the bridge" | The fix panel shows the bridge with one spot in each player's colour; both must be tapped (any order, simultaneous works). The fix uses up the child's turn. |
 | Session end / lock | The lock is saved when the 12th turn is played (so closing the app during the ride does not re-open play). Unlocks at local midnight. Clock set backwards stays locked. |
-| Parent override | Hold the lock button 3 s (ring fills; letting go early resets). Allows one more session today. |
+| Parent override | Hidden: hold the heading of the END / locked screen 3 s. No button is shown; a ring appears under the finger only after ~0.7 s of holding, and releasing or sliding away early resets it. Allows one more session today. |
 | Soft sound | Synthesised sine tones only, max gain 0.08, ≥ 40 ms fade-in; no audio files. No sound at all for an invalid drop. |
 | No network | No `fetch`/XHR/beacons in app code (tested), and the built page has CSP `connect-src 'none'`. The service worker only serves same-origin files from its cache. |
 
