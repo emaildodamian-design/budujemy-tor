@@ -8,7 +8,7 @@ import { deletePhoto, getPhoto, savePhoto, shrinkPhoto } from './platform/photos
 import { type Settings, loadLock, loadSettings, saveLock, saveSettings } from './platform/settings';
 import { cardIcon } from './ui/art';
 import { mountGame } from './ui/game';
-import { holdButton } from './ui/longpress';
+import { attachHold } from './ui/longpress';
 import { h } from './ui/svg';
 
 const root = document.getElementById('app')!;
@@ -131,6 +131,7 @@ async function showSetup() {
         h('h3', {}, t('settings')),
         h('div', { class: 'setting' }, h('span', {}, t('sound')), soundBtn),
         h('div', { class: 'setting' }, h('span', {}, t('language')), langRow),
+        h('p', { class: 'hint small' }, t('parentHoldHint')),
       ),
       next,
     ),
@@ -165,11 +166,13 @@ function showGame(t: T) {
 }
 
 // ---------- END / locked ----------
-function overrideButton(t: T): HTMLElement {
-  return holdButton(t('parentHold'), () => {
+/** The heading doubles as the hidden parent override (hold 3 s). No visible button. */
+function withOverride(heading: HTMLElement): HTMLElement {
+  attachHold(heading, () => {
     saveLock(UNLOCKED);
     void showSetup();
   });
+  return heading;
 }
 
 function showEnd(t: T, card: CardId) {
@@ -177,9 +180,8 @@ function showEnd(t: T, card: CardId) {
     h(
       'main',
       { class: 'screen end' },
-      h('h1', { class: 'end-title' }, t('endTitle'), ' ', t('endNow')),
+      withOverride(h('h1', { class: 'end-title' }, t('endTitle'), ' ', t('endNow'))),
       cardView(card, photoUrl, t, true),
-      h('div', { class: 'corner' }, overrideButton(t)),
     ),
   );
 }
@@ -193,11 +195,10 @@ async function showLocked() {
       'main',
       { class: 'screen locked' },
       h('div', { class: 'moon', 'aria-hidden': 'true' }),
-      h('h1', {}, t('lockedTitle')),
+      withOverride(h('h1', {}, t('lockedTitle'))),
       h('p', { class: 'lead' }, t('lockedSub')),
       h('p', { class: 'lead small' }, t('endNow')),
       cardView(settings.card, url, t),
-      h('div', { class: 'corner' }, overrideButton(t)),
     ),
   );
 }
