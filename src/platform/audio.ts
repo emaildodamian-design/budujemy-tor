@@ -19,11 +19,10 @@ export const SOUNDS = {
     { freq: 392, at: 0, dur: 0.35, gain: 0.7 },
     { freq: 523.25, at: 0.12, dur: 0.4, gain: 0.5 },
   ],
-  repairTap: [{ freq: 440, at: 0, dur: 0.3, gain: 0.6 }],
-  repaired: [
-    { freq: 392, at: 0, dur: 0.4, gain: 0.6 },
-    { freq: 493.88, at: 0.18, dur: 0.4, gain: 0.6 },
-    { freq: 587.33, at: 0.36, dur: 0.6, gain: 0.6 },
+  arrive: [
+    { freq: 392, at: 0, dur: 0.4, gain: 0.55 },
+    { freq: 493.88, at: 0.2, dur: 0.4, gain: 0.5 },
+    { freq: 587.33, at: 0.4, dur: 0.7, gain: 0.45 },
   ],
   chug: [{ freq: 110, at: 0, dur: 0.22, gain: 0.5 }],
   engineOff: [

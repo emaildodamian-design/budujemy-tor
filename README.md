@@ -1,32 +1,73 @@
 # Budujemy Tor
 
-A calm, turn-based **co-play** game for one parent and one young child on one phone.
-They take turns laying track tiles, then watch the toy train ride the track they built
-together, park in the depot and switch off. Then: *"Koniec. Teraz: [kąpiel / jedzenie / spacer / książka]"*.
+A calm **track-building puzzle** for a young child, with one parent beside them as a helper.
+Each board has a start shed, a depot, some scenery and a small tray of track pieces. The child
+lays the pieces to join the start to the depot (bridges over rivers, tunnels through mountains,
+past every station), then presses the big engine button to watch the train test the track.
+After four boards the train rolls into the depot and switches off. Then:
+*"Koniec. Teraz: [kąpiel / jedzenie / spacer / książka]"*.
 
-Offline-first PWA · Polish UI (Portuguese optional) · no backend, no accounts, no analytics,
-no network calls · sound off by default · one session per day.
+Offline-first PWA · pre-reader friendly (no words on any child-facing screen) · Polish parent UI
+(Portuguese optional) · no backend, no accounts, no analytics, no network calls · sound off by
+default · one session per day.
 
-The contract is [`SPEC.md`](SPEC.md). The PR description tracks done / not done against it.
+The v1 contract is [`SPEC.md`](SPEC.md); the v2 puzzle brief is tracked in the PR description
+(done / not done). The level table is [`LEVELS.md`](LEVELS.md) (generated).
+
+## What changed from v1
+
+| v1 (turn-taking toy) | v2 (puzzle) |
+|---|---|
+| Parent and child alternate 12 turns, the track grows from its open end. | One child builds, the parent helps with a limited hint lamp. 40 fixed boards in 8 chapters. |
+| Tiles are relative to the train's heading (left / straight / right). | Pieces have absolute orientations (`NS`, `EW`, `NE`, `ES`, `SW`, `NW`); straight, curve, bridge, tunnel. |
+| Any track is accepted. | The **test run** (`trace`) shows where the track breaks: the train slows, stops with a puff, the break cell glows soft warm white. |
+| Broken-bridge "fix it together" event. | Repair boards: pre-laid track with 1–2 wrong pieces to swap or turn. |
+| `src/game/session.ts` turn state machine. | Removed. Replaced by `level.ts`, `trace.ts`, `solver.ts`, `hints.ts`, `placement.ts`, `progress.ts` (all pure). |
+
+Kept from v1: grid geometry, the next-day lock and the **hidden** 3 s parent override (hold the
+heading of the END / locked screen; there is no visible override button), audio / photos /
+settings, the Potem card flow, the END screen, the service worker (cache renamed
+`budujemy-tor-v2-*` so installed copies update) and the Pages workflow.
 
 ## How a session goes
 
-1. **Parent setup**: pick the *Potem* card (bath, meal, walk, book), optionally add a photo
-   (kept only on this phone in IndexedDB), set sound (off by default) and language (PL / PT).
-2. **Intro**: "Najpierw budujemy tor. Potem: [card]".
-3. **12 turns**, CHILD first, then PARENT, alternating. Each turn opens after a soft ~5 s pause
-   (a ring fills around the active avatar and dots fade out). The player drags one tile
-   (curve left / straight / curve right) from the tray onto the glowing cell at the end of the track.
-   A drop anywhere else, or a tile that would box the track in, glides back: no sound, no red.
-   Wagons at the top show the turns left and disappear one by one.
-4. **Broken bridge** (1 or 2 times): on a PARENT turn the tiles are broken bridges. The next CHILD
-   turn is "fix it together": the child and the parent each tap their own spot on the bridge.
-5. **Ride**: the train rolls slowly along the whole track once, into the depot, and switches off
-   (smoke stops, headlight dims).
-6. **END**: "Koniec. Teraz: [card]". No play-again button. Until tomorrow the app shows
-   "Tor na dziś gotowy". A parent can unlock early by holding the big heading at the top of the
-   END or locked screen for 3 seconds. There is no visible button (so a child has nothing to find);
-   the setup screen tells the parent where to hold.
+1. **Parent setup** (words are fine here): pick the *Potem* card, optional local photo, sound
+   (off by default), language (PL / PT). A progress box shows "N / 40" and, for the last 5
+   sessions, boards solved without / with help. Start by **holding** the start button 1.5 s.
+2. **Intro picture**: track → Potem card. No words.
+3. **4 boards** (wagons at the top; one uncouples after each board). Session 1 plays L01–L04.
+   Later sessions: one warm-up (a mirrored copy of a board solved without help, picked from the
+   date), then 3 more boards.
+4. Each board: a **5 s look phase** (tray resting, a soft ring fills round the go button), then
+   build. Tap a tray piece to lift it and tap a cell, or drag it. Dropping on a movable piece swaps
+   (the old one floats back). Tap a placed piece to turn it; hold it 0.5 s, or drag it to the tray,
+   to take it back. Press go: the train rides at ~0.6 s per cell.
+5. **Helper lamp** (2 per board, beside the parent avatar): first tap moves the lamp onto the
+   avatar, second tap shows the hint (lamp 1: glow the cell; lamp 2: also pulse the tray piece).
+6. After the 4th board: a slow depot ride (engine off, lights dim), then "Koniec. Teraz: [card]",
+   then the next-day lock.
+7. **Parent pause**: hold the small corner control 1.5 s → continue / end session (pictures only).
+   Ending goes to the depot ride and END card; the board in progress is not counted.
+
+## Levels: how they are authored and validated
+
+Levels live in [`src/game/levels.json`](src/game/levels.json), one per line, in the format of
+`Level` in `src/game/level.ts`: grid rows (`.` grass, `R` rock, `H` house, `T` tree, `~` river,
+`^` mountain, `A` start, `B` depot, `S` station), start exit, depot entry, stations, pre-laid
+pieces, tray, `rotate`, `placement`, `goalStrip` and one declared `solution`.
+
+To add or change a level:
+
+1. Edit `levels.json` (coordinates are `[x, y]`, rows top to bottom; boards ≤ 5 × 6).
+2. `npm run levels` regenerates [`LEVELS.md`](LEVELS.md) with the solver's solution count.
+3. `npm test` checks, for every level: schema, the declared solution passes `trace` with owned
+   pieces on legal terrain, the **solver** solves it independently, intro boards have ≤ 2
+   solutions, chapters 1–5 use every tray piece, repair boards fail their first run and are
+   fixable by swaps, mirrored copies stay solvable, hints finish it from empty and from 200 random
+   partial boards, and tiles stay ≥ 64 px at 360 × 640. `levels.json` is also validated at load.
+
+L01–L12 ship exactly as specified. L13–L40 were authored to the chapter plan and checked with the
+solver (see LEVELS.md for board, pieces, distractors and solution counts).
 
 ## Run locally
 
@@ -35,7 +76,8 @@ Requires Node 22+.
 ```bash
 npm install
 npm run dev        # http://localhost:5173 (no service worker in dev)
-npm test           # unit tests (vitest)
+npm test           # unit + UI tests (vitest)
+npm run levels     # regenerate LEVELS.md after editing levels.json
 npm run build      # static site in dist/ (typecheck + build + generated sw.js)
 npm run preview    # serve dist/ at http://localhost:4173 (service worker active)
 ```
@@ -70,38 +112,42 @@ time the app is opened online.
 
 ## Design decisions
 
-**Tech: vanilla TypeScript + Vite (build only), no runtime framework.** The app is five small
-screens and one SVG board. A framework would add weight and abstraction without value here;
-vanilla TS keeps the bundle ~10 KB gzipped (fast first load on mobile, tiny offline cache),
-gives direct control over pointer events and animation for drag-and-drop, and has zero runtime
-dependencies to audit for tracking or network calls. Vite only bundles; Vitest runs the tests.
+**Tech: vanilla TypeScript + Vite (build only), no runtime framework.** A handful of screens and
+one SVG board; vanilla TS keeps the bundle ~20 KB gzipped, gives direct control over pointer
+events and animation, and has zero runtime dependencies to audit for tracking or network calls.
 
-**All rules are pure functions** in `src/game/` (`session.ts`, `lock.ts`, `grid.ts`). Time and
-randomness are passed in, so the turn logic, cap, input delay, bridge and lock are unit-tested
-without a browser. The UI in `src/ui/` only draws and forwards input.
+**All rules are pure functions** in `src/game/`. Time, the date and randomness are passed in, so
+trace, solver, hints, placement and the session rules are unit-tested without a browser. The UI
+in `src/ui/` only draws and forwards input; happy-dom tests drive it (no words on child screens,
+tap / drag / swap / turn / hold, stuck ladder, pause).
 
-**Interpretations of the spec**
+**Interpretations of the brief**
 
-| Spec item | How it is implemented |
+| Brief item | How it is implemented |
 |---|---|
-| "adjacent free cell" | The track grows from its open end, so exactly one cell is valid: the one the track points to. It glows in the active player's colour. |
-| straight / curve | The tray shows *curve left, straight, curve right*, already drawn in board orientation: what you drag is what you get. |
-| Never getting stuck | A tile is refused (it just slides back) if it would leave no room for all remaining turns plus the depot. Tested over 400 random games. |
-| Broken bridge 1–2× | Scheduled at session start on the parent's 2nd–5th turn (never the first or the last parent turn; two bridges are never back to back). |
-| "both tap the bridge" | The fix panel shows the bridge with one spot in each player's colour; both must be tapped (any order, simultaneous works). The fix uses up the child's turn. |
-| Session end / lock | The lock is saved when the 12th turn is played (so closing the app during the ride does not re-open play). Unlocks at local midnight. Clock set backwards stays locked. |
-| Parent override | Hidden: hold the heading of the END / locked screen 3 s. No button is shown; a ring appears under the finger only after ~0.7 s of holding, and releasing or sliding away early resets it. Allows one more session today. |
-| Soft sound | Synthesised sine tones only, max gain 0.08, ≥ 40 ms fade-in; no audio files. No sound at all for an invalid drop. |
-| No network | No `fetch`/XHR/beacons in app code (tested), and the built page has CSP `connect-src 'none'`. The service worker only serves same-origin files from its cache. |
+| `trace` order | As specified: mismatch is checked before loop, so running back into laid track reads as `mismatch`; `loop` is running back into the start shed. A bridge/tunnel on grass (free placement) stops the train with `needsTrack`. |
+| Hint step 3 "walk back" | Removal order is: the piece that stopped the train (if it is off the route), then the route's movable pieces from the end. The hint names the earliest removed piece and the piece that should go there. |
+| Hints pick | The fewest-pieces completion (branch and bound), so from an empty board a hint sequence never exceeds the solution length. |
+| Auto orientation | Connect to neighbouring open ends; prefer two connections; never point a loose end into scenery or off the board; ties by side order. A tap cycles the (≤ 2) connecting orientations. |
+| Free rotation | Tray pieces arrive as straight `EW` / curve `ES`; a tap turns 90° clockwise. |
+| Stuck ladder | +1 when a run gets no further than the best so far, or after 90 s with no input; reset when a run gets further. 2 → lamp pulses once; 3 → hint cell; 4 → ghost path (all but the final piece), level marked helped. |
+| Quiet skip | Counts new boards only (not warm-ups/replays); after a skip the count restarts, so at most every other board is skipped. Never skips intro or repair boards. |
+| Requeue | A board solved with help returns mirrored 2 sessions later; at most 2 requeues per session so there is always a new board while any remain. |
+| After L40 | Each slot draws a mirrored solved board from L20–L40, picked from the date and slot. |
+| Station intro (L19) | 4 × 3 like the given obstacle intro (L05), per the chapter table. |
+| Goal strip | `full`: one icon per bridge / tunnel in the declared solution plus stations; `stations-only`: stations. The depot icon lights on arrival. |
+| Parent override | Unchanged from main: hidden 3 s hold on the END / locked heading. The start and pause holds (1.5 s) reuse the same `attachHold` with a shorter time. |
+| No network | No `fetch`/XHR/beacons in app code (tested), CSP `connect-src 'none'`, same-origin service worker. |
 
 ## Project layout
 
 ```
-src/game/       pure rules: grid geometry, session state machine, next-day lock
-src/platform/   localStorage settings, IndexedDB photos, soft WebAudio
-src/ui/         SVG art, game screen (drag, countdown, bridge, ride), long-press
-src/main.ts     screens: setup → intro → game → end / locked
+src/game/       pure rules: level model, trace, solver, hints, placement, progress, lock, grid
+src/game/levels.json   the 40 levels (validated at load and in tests)
+src/platform/   localStorage settings + bookmark, IndexedDB photos, soft WebAudio
+src/ui/         SVG art, level screen, scenes, layout, route geometry, long-press
+src/main.ts     screens: setup → intro → 4 boards → depot ride → end / locked
 sw/             service worker template (precache list filled in at build)
-tests/          vitest unit tests
+tests/          vitest unit + happy-dom UI tests; levelsReport.ts builds LEVELS.md
 scripts/        icon generator (renders the PNG icons with Chromium)
 ```

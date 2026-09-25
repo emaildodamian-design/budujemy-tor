@@ -1,11 +1,6 @@
-import {
-  type SessionState,
-  INPUT_DELAY_MS,
-  fittingKinds,
-  placeTile,
-  tapBridge,
-  turnKind,
-} from '../src/game/session';
+import type { Level, PieceKind, Placed } from '../src/game/level';
+import { boardOf, cellOf, isBuildable, orientationsFor, terrainAccepts, terrainAt } from '../src/game/level';
+import { handFor } from '../src/game/solver';
 
 /** Small deterministic PRNG so tests are reproducible. */
 export function seeded(seed: number): () => number {
@@ -19,24 +14,39 @@ export function seeded(seed: number): () => number {
   };
 }
 
-/** A clock that only ever moves past the input delay. */
-export function after(s: SessionState): number {
-  return s.turnStartedAt + INPUT_DELAY_MS;
+export const P = (x: number, y: number, piece: PieceKind, openings: Placed['openings']): Placed => ({ at: [x, y], piece, openings });
+
+/** Deep-freeze so any mutation of an input throws. */
+export function frozen<T>(v: T): T {
+  if (v && typeof v === 'object') {
+    Object.values(v).forEach(frozen);
+    Object.freeze(v);
+  }
+  return v;
 }
 
-/** Play one turn the way two cooperative players would. */
-export function playTurn(s: SessionState, pick: (kinds: string[]) => number = () => 0): SessionState {
-  const now = after(s);
-  if (turnKind(s) === 'fix') {
-    const r1 = tapBridge(s, 'child', now);
-    if (!r1.ok) throw new Error(r1.reason);
-    const r2 = tapBridge(r1.state, 'parent', now);
-    if (!r2.ok) throw new Error(r2.reason);
-    return r2.state;
+/** Up to `n` random wrong pieces on free legal cells, using what is left in the hand. */
+export function scatter(level: Level, pieces: Placed[], n: number, rnd: () => number): Placed[] {
+  const b = boardOf(level);
+  const out = [...pieces];
+  for (let k = 0; k < n; k++) {
+    const hand = handFor(level, out);
+    const kinds = (Object.keys(hand) as PieceKind[]).filter((x) => hand[x] > 0);
+    if (!kinds.length) break;
+    const kind = kinds[Math.floor(rnd() * kinds.length)];
+    const cells: [number, number][] = [];
+    for (let y = 0; y < b.rows; y++)
+      for (let x = 0; x < b.cols; x++) {
+        const t = terrainAt(level, { x, y });
+        if (!isBuildable(t) || b.fixed.has(`${x},${y}`) || out.some((p) => p.at[0] === x && p.at[1] === y)) continue;
+        if (level.placement === 'strict' && !terrainAccepts(t, kind)) continue;
+        cells.push([x, y]);
+      }
+    if (!cells.length) break;
+    const at = cells[Math.floor(rnd() * cells.length)];
+    const os = orientationsFor(kind);
+    out.push({ at, piece: kind, openings: os[Math.floor(rnd() * os.length)] });
+    void cellOf;
   }
-  const kinds = fittingKinds(s);
-  if (kinds.length === 0) throw new Error(`stuck at turn ${s.turn}`);
-  const r = placeTile(s, kinds[pick(kinds) % kinds.length], s.head.cell, now);
-  if (!r.ok) throw new Error(r.reason);
-  return r.state;
+  return out;
 }

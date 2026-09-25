@@ -38,6 +38,12 @@ describe('no network, no tracking, no notifications (safeguards 4 & 7)', () => {
     expect(sw).toMatch(/req\.method !== 'GET' \|\| url\.origin !== self\.location\.origin\) return;/);
   });
 
+  it('v2 bumps the service-worker cache name, and old caches are cleared on activate', () => {
+    const sw = readFileSync('sw/sw.template.js', 'utf8');
+    expect(sw).toContain('const CACHE = `budujemy-tor-v2-${VERSION}`;');
+    expect(sw).toMatch(/k\.startsWith\('budujemy-tor-'\) && k !== CACHE/);
+  });
+
   it('the built page is locked down with connect-src none', () => {
     expect(readFileSync('vite.config.ts', 'utf8')).toContain(`"connect-src 'none'"`);
   });
@@ -91,5 +97,18 @@ describe('stored state parsing', () => {
     expect(parseSettings('{"lang":"de","card":"tv"}')).toEqual(DEFAULT_SETTINGS);
     expect(parseLock('garbage')).toEqual({ lastEndedDay: null });
     expect(parseLock('{"lastEndedDay":"2026-09-24"}')).toEqual({ lastEndedDay: '2026-09-24' });
+  });
+});
+
+describe('parent override stays hidden (next-day lock)', () => {
+  it('no visible override button anywhere; the END and locked headings carry the 3 s hold', () => {
+    for (const { p, code } of APP) {
+      expect(code, p).not.toMatch(/holdButton|hold-btn|parentHold'/);
+    }
+    const main = readFileSync('src/main.ts', 'utf8');
+    expect(main).toMatch(/withOverride\(h\('h1', \{ class: 'end-title' \}/);
+    expect(main).toMatch(/withOverride\(h\('h1', \{\}, t\('lockedTitle'\)\)\)/);
+    // The override itself uses the default 3 s hold.
+    expect(main).toMatch(/attachHold\(heading, \(\) => \{/);
   });
 });

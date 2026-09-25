@@ -1,13 +1,17 @@
-// App shell: setup (parent) → intro (Potem card) → game → END. Locked until tomorrow afterwards.
+// App shell: setup (parent) → intro picture → a session of 4 puzzle levels → depot ride → END.
+// Locked until tomorrow afterwards (hidden 3 s hold on the heading overrides).
 
 import './style.css';
-import { isLocked, markSessionEnded, UNLOCKED } from './game/lock';
+import { dayKey, isLocked, markSessionEnded, UNLOCKED } from './game/lock';
+import { LEVEL_COUNT, LEVELS } from './game/levels';
+import { type Bookmark, type SessionRun, SLOTS, endSession, finishLevel, levelForSlot, progressCount, startSession } from './game/progress';
 import { type CardId, CARD_IDS, type Lang, LANGS, type T, translator } from './i18n';
 import { SoftAudio } from './platform/audio';
 import { deletePhoto, getPhoto, savePhoto, shrinkPhoto } from './platform/photos';
-import { type Settings, loadLock, loadSettings, saveLock, saveSettings } from './platform/settings';
+import { type Settings, loadBookmark, loadLock, loadSettings, saveBookmark, saveLock, saveSettings } from './platform/settings';
 import { cardIcon } from './ui/art';
-import { mountGame } from './ui/game';
+import { mountLevel } from './ui/game';
+import { depotRideScene, introScene } from './ui/scenes';
 import { attachHold } from './ui/longpress';
 import { h } from './ui/svg';
 
@@ -112,8 +116,21 @@ async function showSetup() {
     langRow.append(b);
   }
 
-  const next = h('button', { class: 'btn primary big', type: 'button' }, t('start'));
-  next.addEventListener('click', () => showIntro());
+  // Parent-facing: the start button needs a 1.5 s hold, so a child's tap does nothing.
+  const next = h('button', { class: 'btn primary big hold-start', type: 'button' }, t('start'));
+  attachHold(next, () => showIntro(), 1500);
+
+  const bm = loadBookmark();
+  const recent = bm.log.length
+    ? h('p', { class: 'hint small' }, `${t('progressRecent')}: `, bm.log.map((l) => `${l.self} / ${l.helped}`).join(' · '))
+    : h('p', { class: 'hint small' }, t('progressNone'));
+  const progress = h(
+    'section',
+    { class: 'settings', 'aria-label': t('progress') },
+    h('h3', {}, t('progress')),
+    h('div', { class: 'setting' }, h('span', {}, t('progressBoards')), h('strong', {}, `${progressCount(bm, LEVEL_COUNT)} / ${LEVEL_COUNT}`)),
+    recent,
+  );
 
   show(
     h(
@@ -133,36 +150,67 @@ async function showSetup() {
         h('div', { class: 'setting' }, h('span', {}, t('language')), langRow),
         h('p', { class: 'hint small' }, t('parentHoldHint')),
       ),
+      progress,
       next,
     ),
   );
 }
 
-// ---------- intro: the Potem card is shown before play ----------
+// ---------- intro: track, then the Potem card (pictures only) ----------
 function showIntro() {
   // The language is fixed from here until the session is over.
   const t = translator(settings.lang);
   setLang(settings.lang);
-  const go = h('button', { class: 'btn primary big', type: 'button' }, t('go'));
-  go.addEventListener('click', () => showGame(t));
-  show(h('main', { class: 'screen intro' }, h('p', { class: 'lead' }, t('introFirst')), h('p', { class: 'lead' }, t('then')), cardView(settings.card, photoUrl, t, true), go));
+  const scene = introScene(settings.card, photoUrl, () => showSession(t));
+  show(scene.el);
+  cleanup = scene.stop;
 }
 
-// ---------- game ----------
-function showGame(t: T) {
-  const screen = h('div', { class: 'game-root' });
-  show(screen);
-  void keepAwake(true);
+// ---------- a session: 4 slots ----------
+function showSession(t: T) {
   const card = settings.card;
-  cleanup = mountGame(screen, {
-    t,
-    audio,
-    onBuildDone: () => saveLock(markSessionEnded(new Date())),
-    onFinished: () => {
+  const day = dayKey(new Date());
+  let bm: Bookmark = loadBookmark();
+  let run: SessionRun = startSession(LEVELS, bm, day);
+  let ended = false;
+  void keepAwake(true);
+
+  const finish = () => {
+    if (ended) return;
+    ended = true;
+    // Saved before the ride, so closing the app now does not re-open play today.
+    bm = endSession(bm, run, dayKey(new Date()));
+    saveBookmark(bm);
+    saveLock(markSessionEnded(new Date()));
+    const scene = depotRideScene(() => {
       void keepAwake(false);
       showEnd(t, card);
-    },
-  });
+    });
+    show(scene.el);
+    cleanup = scene.stop;
+  };
+
+  const play = () => {
+    const screen = h('div', { class: 'game-root' });
+    show(screen);
+    cleanup = mountLevel(screen, {
+      t,
+      audio,
+      level: levelForSlot(LEVELS, run.current),
+      wagons: SLOTS - run.slot,
+      onSolved: (result) => {
+        const r = finishLevel(LEVELS, bm, run, result);
+        bm = r.bm;
+        run = r.run;
+        saveBookmark(bm);
+        if (r.over) finish();
+        else play();
+      },
+      // Parent pause → end: the level in progress is not counted (the bookmark is unchanged).
+      onEndSession: finish,
+    });
+  };
+  play();
 }
 
 // ---------- END / locked ----------

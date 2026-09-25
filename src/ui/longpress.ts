@@ -9,7 +9,12 @@ import { s } from './svg';
 /** Movement allowed while holding before the press is cancelled. */
 const MOVE_TOLERANCE_PX = 24;
 
-export function attachHold(target: HTMLElement, onComplete: () => void): void {
+/**
+ * Hold `target` for `ms` (default: the 3 s parent override) to fire `onComplete`.
+ * v2 also uses it with 1.5 s for the parent's start and pause controls.
+ */
+export function attachHold(target: HTMLElement, onComplete: () => void, ms: number = LONG_PRESS_MS): void {
+  const complete = (pressed: number, now: number) => (ms === LONG_PRESS_MS ? isLongPressComplete(pressed, now) : now - pressed >= ms);
   const ring = s('circle', { class: 'hold-ring', cx: 32, cy: 32, r: 26, pathLength: 100 });
   const overlay = s('svg', { viewBox: '0 0 64 64', class: 'hold-overlay', 'aria-hidden': 'true' }, ring);
 
@@ -26,8 +31,8 @@ export function attachHold(target: HTMLElement, onComplete: () => void): void {
   const tick = () => {
     if (pressedAt === null) return;
     const now = performance.now();
-    ring.style.strokeDashoffset = String(100 - Math.min(100, ((now - pressedAt) / LONG_PRESS_MS) * 100));
-    if (isLongPressComplete(pressedAt, now)) {
+    ring.style.strokeDashoffset = String(100 - Math.min(100, ((now - pressedAt) / ms) * 100));
+    if (complete(pressedAt, now)) {
       reset();
       onComplete();
       return;

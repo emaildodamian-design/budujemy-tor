@@ -1,7 +1,9 @@
-// Parent settings and the next-day lock, kept in localStorage on this device only.
+// Parent settings, the next-day lock and the puzzle bookmark, kept in localStorage on
+// this device only. Every access is wrapped: the app works without storage.
 
 import type { LockState } from '../game/lock';
 import { UNLOCKED } from '../game/lock';
+import { type Bookmark, parseBookmark } from '../game/progress';
 import { type CardId, CARD_IDS, type Lang, LANGS } from '../i18n';
 
 export interface Settings {
@@ -15,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = { lang: 'pl', sound: false, card: 'bat
 
 const SETTINGS_KEY = 'budujemy-tor:settings';
 const LOCK_KEY = 'budujemy-tor:lock';
+const BOOKMARK_KEY = 'budujemy-tor:bookmark';
 
 /** Parse stored settings, falling back to safe defaults for anything unknown. */
 export function parseSettings(raw: string | null): Settings {
@@ -60,3 +63,5 @@ export const loadSettings = (): Settings => parseSettings(read(SETTINGS_KEY));
 export const saveSettings = (s: Settings): void => write(SETTINGS_KEY, s);
 export const loadLock = (): LockState => parseLock(read(LOCK_KEY));
 export const saveLock = (l: LockState): void => write(LOCK_KEY, l);
+export const loadBookmark = (): Bookmark => parseBookmark(read(BOOKMARK_KEY));
+export const saveBookmark = (b: Bookmark): void => write(BOOKMARK_KEY, b);
