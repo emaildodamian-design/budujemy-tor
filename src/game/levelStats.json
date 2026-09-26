@@ -289,11 +289,11 @@
  },
  "L37": {
   "board": "6×6",
-  "minLen": 12,
+  "minLen": 13,
   "distractors": 0,
-  "planDepth": 5,
-  "detour": 8,
-  "solutions": 1
+  "planDepth": 2,
+  "detour": 9,
+  "solutions": 2
  },
  "L38": {
   "board": "6×6",

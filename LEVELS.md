@@ -49,7 +49,7 @@ The 48 main levels come first, then the step-down siblings. Definitions: `src/ga
 | L34 | practice | 6 | 6×6 | 9s 4c 3t | 13 | 3 | 1 | 3 | 10 | 0 | 5 | 2 | 0 | tunnel |
 | L35 | practice | 6 | 6×7 | 4s 9c 2t | 11 | 4 | 2 | 3 | 8 | 0 | 6 | 1 | 0 | tunnel |
 | L36 | repair | 6 | 6×6 | 10s 6c (7 pre-laid) | 13 | 3 | 1 | 7 | 6 | 0 | 5 | 0 | 3 | – |
-| L37 | intro: order | 7 | 6×6 | 5s 7c | 12 | 0 | 1 | 4 | 8 | 0 | 5 | 0 | 0 | station, order |
+| L37 | intro: order | 7 | 6×6 | 5s 8c | 13 | 0 | 2 | 4 | 9 | 0 | 2 | 0 | 0 | station, order |
 | L38 | practice | 7 | 6×6 | 9s 9c | 14 | 4 | 1 | 2 | 12 | 0 | 5 | 0 | 0 | station, order |
 | L39 | practice | 7 | 6×6 | 9s 8c | 13 | 4 | 1 | 5 | 8 | 0 | 6 | 0 | 0 | station, order |
 | L40 | practice | 7 | 6×6 | 9s 9c | 14 | 4 | 1 | 5 | 9 | 0 | 7 | 0 | 0 | station, order |
