@@ -124,6 +124,10 @@ npm run gen:set -- --merge                             # merge the chapters into
 npm run levels                                         # regenerate LEVELS.md and levelStats.json
 ```
 
+The shipped set was built with `npm run gen:set -- --chapter N` for chapters 1–5, 7 and 8, and
+`npm run gen:set -- --chapter 6 --min-plan 5 --min-len 11` for chapter 6 (floors that keep its
+medians at or above chapter 5's), then `--merge` and `npm run levels`.
+
 Method: place the start and the depot (random door side); add terrain as clustered blobs
 (rivers as full lines), obstacles, stations; hand = unlimited straights and curves + the
 chapter's bridges / tunnels; find the shortest legal route, pick a random route of length
