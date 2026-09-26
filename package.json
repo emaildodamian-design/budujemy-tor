@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "icons": "node scripts/make-icons.mjs",
-    "levels": "UPDATE_LEVELS=1 vitest run tests/levels.test.ts"
+    "levels": "UPDATE_LEVELS=1 vitest run tests/levels.test.ts",
+    "gen": "node scripts/run-ts.mjs scripts/gen-levels.ts",
+    "gen:set": "node scripts/run-ts.mjs scripts/build-set.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",
