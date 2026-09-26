@@ -19,7 +19,7 @@ The 48 main levels come first, then the step-down siblings. Definitions: `src/ga
 | L04 | intro: rotation | 1 | 5×4 | 2s 3c | 5 | 0 | 1 | 3 | 2 | 0 | 2 | 0 | 0 | – |
 | L05 | practice | 1 | 5×5 | 3s 4c | 7 | 0 | 2 | 5 | 2 | 0 | 3 | 0 | 0 | – |
 | L06 | practice | 1 | 5×5 | 4s 5c | 8 | 1 | 1 | 6 | 2 | 0 | 3 | 0 | 0 | – |
-| L07 | intro: bridge | 2 | 5×5 | 1s 4c 1b | 6 | 0 | 1 | 6 | 0 | 0 | 2 | 0 | 0 | bridge |
+| L07 | intro: bridge | 2 | 5×5 | 3s 3c 1b | 7 | 0 | 1 | 7 | 0 | 0 | 2 | 0 | 0 | bridge |
 | L08 | practice | 2 | 5×6 | 4s 3c 3b | 8 | 2 | 1 | 4 | 4 | 0 | 2 | 2 | 0 | bridge |
 | L09 | practice | 2 | 5×5 | 2s 7c 1b | 8 | 2 | 1 | 6 | 2 | 0 | 3 | 0 | 0 | bridge |
 | L10 | practice | 2 | 5×6 | 4s 5c 1b | 9 | 1 | 1 | 3 | 6 | 0 | 3 | 0 | 0 | bridge |
@@ -56,9 +56,9 @@ The 48 main levels come first, then the step-down siblings. Definitions: `src/ga
 | L41 | practice | 7 | 6×6 | 9s 9c | 15 | 3 | 2 | 4 | 11 | 0 | 8 | 0 | 0 | station, order |
 | L42 | repair | 7 | 6×7 | 7s 8c 2b (13 pre-laid) | 14 | 3 | 1 | 4 | 10 | 0 | 5 | 2 | 2 | station, order |
 | L43 | practice | 8 | 6×7 | 5s 8c 2b 4t | 14 | 5 | 1 | 5 | 9 | 0 | 6 | 4 | 0 | bridge, tunnel, station |
-| L44 | practice | 8 | 6×7 | 8s 9c 2b 3t | 17 | 5 | 1 | 8 | 9 | 0 | 7 | 3 | 0 | bridge, tunnel, station, order |
-| L45 | practice | 8 | 6×7 | 4s 9c 4b 3t | 15 | 5 | 1 | 8 | 7 | 0 | 9 | 5 | 0 | bridge, tunnel, station |
-| L46 | practice | 8 | 6×7 | 9s 9c 2b 1t | 17 | 4 | 1 | 5 | 12 | 0 | 9 | 2 | 0 | bridge, station, order |
+| L44 | practice | 8 | 6×7 | 8s 8c 1b 2t | 15 | 4 | 1 | 4 | 11 | 0 | 6 | 2 | 0 | bridge, station, order |
+| L45 | practice | 8 | 6×7 | 8s 5c 4b 2t | 14 | 5 | 2 | 4 | 10 | 0 | 7 | 4 | 0 | bridge, tunnel, station |
+| L46 | practice | 8 | 6×7 | 6s 7c 4b 2t | 15 | 4 | 1 | 5 | 10 | 0 | 8 | 4 | 0 | bridge, tunnel, station, order |
 | L47 | practice | 8 | 6×7 | 7s 9c 4b 3t | 18 | 5 | 2 | 7 | 11 | 0 | 9 | 4 | 0 | bridge, tunnel, station |
 | L48 | finale | 8 | 6×7 | 7s 8c 1b 4t | 16 | 4 | 1 | 8 | 8 | 0 | 9 | 3 | 0 | bridge, tunnel, station, order |
 | L08s | sibling of L08 | 2 | 5×5 | 1s 4c 1b | 6 | 0 | 1 | 4 | 2 | 0 | 1 | 0 | 0 | bridge |
@@ -87,8 +87,8 @@ The 48 main levels come first, then the step-down siblings. Definitions: `src/ga
 | L40s | sibling of L40 | 7 | 6×7 | 3s 9c | 12 | 0 | 2 | 4 | 8 | 0 | 1 | 0 | 0 | station, order |
 | L41s | sibling of L41 | 7 | 6×7 | 4s 8c | 11 | 1 | 1 | 4 | 7 | 0 | 5 | 0 | 0 | station, order |
 | L43s | sibling of L43 | 8 | 6×7 | 3s 4c 1b 1t | 7 | 2 | 2 | 5 | 2 | 0 | 1 | 0 | 0 | bridge, tunnel, station |
-| L44s | sibling of L44 | 8 | 6×7 | 8s 5c 1b 3t | 15 | 2 | 1 | 8 | 7 | 0 | 1 | 1 | 0 | bridge, tunnel, station, order |
-| L45s | sibling of L45 | 8 | 6×7 | 5s 8c 1b 2t | 13 | 3 | 1 | 3 | 10 | 0 | 3 | 1 | 0 | bridge, tunnel, station |
-| L46s | sibling of L46 | 8 | 6×7 | 5s 8c 1b 1t | 15 | 0 | 1 | 6 | 9 | 0 | 2 | 0 | 0 | bridge, tunnel, station, order |
+| L44s | sibling of L44 | 8 | 6×7 | 5s 7c 1t | 13 | 0 | 1 | 4 | 9 | 0 | 3 | 0 | 0 | tunnel, station, order |
+| L45s | sibling of L45 | 8 | 6×7 | 5s 7c 1b 2t | 12 | 3 | 1 | 9 | 3 | 0 | 5 | 1 | 0 | bridge, tunnel, station |
+| L46s | sibling of L46 | 8 | 6×7 | 4s 9c 2b | 13 | 2 | 1 | 9 | 4 | 0 | 1 | 1 | 0 | bridge, station, order |
 | L47s | sibling of L47 | 8 | 6×7 | 5s 5c 2b 2t | 11 | 3 | 2 | 8 | 3 | 0 | 1 | 2 | 0 | bridge, tunnel, station |
 | L48s | sibling of L48 | 8 | 6×7 | 7s 5c 2b | 12 | 2 | 1 | 5 | 7 | 0 | 1 | 1 | 0 | bridge, station, order |

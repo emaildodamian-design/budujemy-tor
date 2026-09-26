@@ -49,7 +49,7 @@
  },
  "L07": {
   "board": "5×5",
-  "minLen": 6,
+  "minLen": 7,
   "distractors": 0,
   "planDepth": 2,
   "detour": 0,
@@ -345,26 +345,26 @@
  },
  "L44": {
   "board": "6×7",
-  "minLen": 17,
-  "distractors": 5,
-  "planDepth": 7,
-  "detour": 9,
+  "minLen": 15,
+  "distractors": 4,
+  "planDepth": 6,
+  "detour": 11,
   "solutions": 1
  },
  "L45": {
   "board": "6×7",
-  "minLen": 15,
+  "minLen": 14,
   "distractors": 5,
-  "planDepth": 9,
-  "detour": 7,
-  "solutions": 1
+  "planDepth": 7,
+  "detour": 10,
+  "solutions": 2
  },
  "L46": {
   "board": "6×7",
-  "minLen": 17,
+  "minLen": 15,
   "distractors": 4,
-  "planDepth": 9,
-  "detour": 12,
+  "planDepth": 8,
+  "detour": 10,
   "solutions": 1
  },
  "L47": {
@@ -593,26 +593,26 @@
  },
  "L44s": {
   "board": "6×7",
-  "minLen": 15,
-  "distractors": 2,
-  "planDepth": 1,
-  "detour": 7,
+  "minLen": 13,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 9,
   "solutions": 1
  },
  "L45s": {
   "board": "6×7",
-  "minLen": 13,
+  "minLen": 12,
   "distractors": 3,
-  "planDepth": 3,
-  "detour": 10,
+  "planDepth": 5,
+  "detour": 3,
   "solutions": 1
  },
  "L46s": {
   "board": "6×7",
-  "minLen": 15,
-  "distractors": 0,
-  "planDepth": 2,
-  "detour": 9,
+  "minLen": 13,
+  "distractors": 2,
+  "planDepth": 1,
+  "detour": 4,
   "solutions": 1
  },
  "L47s": {
