@@ -38,9 +38,9 @@ describe('no network, no tracking, no notifications (safeguards 4 & 7)', () => {
     expect(sw).toMatch(/req\.method !== 'GET' \|\| url\.origin !== self\.location\.origin\) return;/);
   });
 
-  it('v2 bumps the service-worker cache name, and old caches are cleared on activate', () => {
+  it('v3 bumps the service-worker cache name, and old caches are cleared on activate', () => {
     const sw = readFileSync('sw/sw.template.js', 'utf8');
-    expect(sw).toContain('const CACHE = `budujemy-tor-v2-${VERSION}`;');
+    expect(sw).toContain('const CACHE = `budujemy-tor-v3-${VERSION}`;');
     expect(sw).toMatch(/k\.startsWith\('budujemy-tor-'\) && k !== CACHE/);
   });
 
@@ -100,15 +100,25 @@ describe('stored state parsing', () => {
   });
 });
 
-describe('parent override stays hidden (next-day lock)', () => {
-  it('no visible override button anywhere; the END and locked headings carry the 3 s hold', () => {
+describe('parent menu stays hidden (next-day lock)', () => {
+  it('no visible override button anywhere; the END and locked headings and the setup title carry the 3 s hold', () => {
     for (const { p, code } of APP) {
       expect(code, p).not.toMatch(/holdButton|hold-btn|parentHold'/);
     }
     const main = readFileSync('src/main.ts', 'utf8');
     expect(main).toMatch(/withOverride\(h\('h1', \{ class: 'end-title' \}/);
-    expect(main).toMatch(/withOverride\(h\('h1', \{\}, t\('lockedTitle'\)\)\)/);
-    // The override itself uses the default 3 s hold.
-    expect(main).toMatch(/attachHold\(heading, \(\) => \{/);
+    expect(main).toMatch(/withOverride\(h\('h1', \{\}, t\('lockedTitle'\)\), /);
+    // The menu opens on the default 3 s hold, with the unlock only on END / LOCKED.
+    expect(main).toMatch(/attachHold\(heading, \(\) => openParentMenu\(true, back\)\);/);
+    expect(main).toMatch(/attachHold\(title, \(\) => openParentMenu\(false, /);
+    // [Odblokuj dziś] is exactly the v2 override: unlock, then setup.
+    expect(main).toMatch(/onUnlock: \(\) => \{\s+saveLock\(UNLOCKED\);\s+void showSetup\(\);\s+\}/);
+  });
+
+  it('preview writes storage only through "Ustaw jako następny"', () => {
+    const parent = readFileSync('src/ui/parent.ts', 'utf8');
+    expect(parent.match(/saveBookmark\(/g)).toHaveLength(1);
+    expect(parent).toMatch(/deps\.saveBookmark\(setNextLevel\(/);
+    expect(parent).not.toMatch(/localStorage|saveLock|saveSettings|endSession|finishLevel/);
   });
 });

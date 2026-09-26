@@ -1,49 +1,94 @@
 # Levels
 
 Generated from `src/game/levels.json` by `npm run levels` (checked in CI: the test fails if this file is stale).
+The 48 main levels come first, then the step-down siblings. Definitions: `src/game/metrics.ts` and the README.
 
-- **pieces**: length of the declared solution. **distractors**: pieces owned (tray + pre-laid) minus pieces the solution uses; on repair levels this includes the wrong pieces that go back to the tray.
-- **solutions**: distinct solutions the solver finds from an empty board with everything the player owns (capped at 50).
+- **inventory**: tray + pre-laid pieces (s = straight, c = curve, b = bridge, t = tunnel).
+- **minLen**: pieces in the shortest solution. **distractors**: inventory − minLen. **solutions**: distinct solutions (cap 50).
+- **naiveLen**: fewest pieces from the cell in front of the start to any cell next to the depot, ignoring counts, turns, the depot side, arrows and stations. **detour** = minLen − naiveLen.
+- **countSlack** = minLen − freeLen (freeLen: minLen with unlimited straights and curves).
+- **planDepth**: the smallest look-ahead (1–8, 9 = none) with which a greedy player who never takes a piece back reaches the depot.
+- **lures**: bridges / tunnels in the inventory the shortest solution does not use (only where a river / mountain exists). **faults**: repair levels, wrong pre-laid pieces.
+- **mechanics**: bridge, tunnel, station, arrow, order on the shortest solution.
 
-| id | ch | intro | board | terrain | tray | pieces | distractors | rotate / placement | solutions |
-|---|---|---|---|---|---|---|---|---|---|
-| L01 | 1 | straight | 3×3 | – | 1×straight | 1 | 0 | auto / strict | 1 |
-| L02 | 1 |  | 4×3 | – | 2×straight | 2 | 0 | auto / strict | 1 |
-| L03 | 1 | curve | 3×3 | – | 1×curve | 1 | 0 | auto / strict | 1 |
-| L04 | 1 |  | 4×4 | – | 3×straight, 2×curve | 5 | 0 | auto / strict | 2 |
-| L05 | 2 | obstacle | 4×3 | obstacles | 1×straight, 3×curve | 4 | 0 | auto / strict | 1 |
-| L06 | 2 |  | 4×4 | obstacles | 3×straight, 2×curve | 5 | 0 | auto / strict | 1 |
-| L07 | 2 |  | 5×4 | obstacles | 1×straight, 4×curve | 5 | 0 | auto / strict | 1 |
-| L08 | 2 | repair | 4×4 | obstacles | 1×straight + 5 pre-laid | 5 | 1 | auto / strict | 1 |
-| L09 | 3 | bridge | 3×3 | river | 1×bridge | 1 | 0 | auto / strict | 1 |
-| L10 | 3 |  | 4×4 | river | 2×straight, 1×curve, 1×bridge | 4 | 0 | auto / strict | 1 |
-| L11 | 3 |  | 4×3 | river | 2×straight, 1×curve, 1×bridge | 4 | 0 | auto / strict | 1 |
-| L12 | 3 |  | 5×3 | river, obstacles | 1×straight, 2×curve, 2×bridge | 5 | 0 | auto / strict | 1 |
-| L13 | 3 | repair | 5×4 | river | 1×bridge + 6 pre-laid | 6 | 1 | auto / strict | 2 |
-| L14 | 4 | tunnel | 3×3 | mountain | 1×tunnel | 1 | 0 | auto / strict | 1 |
-| L15 | 4 |  | 4×4 | mountain | 2×straight, 1×curve, 1×tunnel | 4 | 0 | auto / strict | 1 |
-| L16 | 4 |  | 5×4 | mountain | 2×straight, 1×curve, 2×tunnel | 5 | 0 | auto / strict | 1 |
-| L17 | 4 |  | 5×5 | mountain | 1×straight, 3×curve, 1×tunnel | 5 | 0 | auto / strict | 2 |
-| L18 | 4 | repair | 5×4 | mountain | 1×tunnel + 5 pre-laid | 5 | 1 | auto / strict | 2 |
-| L19 | 5 | station | 4×3 | station×1 | 3×curve | 3 | 0 | auto / free | 1 |
-| L20 | 5 |  | 5×3 | station×1 | 2×straight, 4×curve | 6 | 0 | auto / free | 1 |
-| L21 | 5 |  | 5×4 | river, station×1 | 2×straight, 2×curve, 1×bridge | 5 | 0 | auto / free | 1 |
-| L22 | 5 |  | 5×5 | station×2 | 4×straight, 3×curve | 7 | 0 | auto / free | 1 |
-| L23 | 5 | repair | 5×4 | station×1 | 2×straight + 6 pre-laid | 3 | 5 | auto / free | 2 |
-| L24 | 6 |  | 4×4 | obstacles | 3×straight, 3×curve | 5 | 1 | auto / free | 1 |
-| L25 | 6 |  | 5×4 | river | 3×straight, 2×curve, 1×bridge, 1×tunnel | 6 | 1 | auto / free | 1 |
-| L26 | 6 |  | 5×5 | obstacles | 4×straight, 3×curve, 1×tunnel | 7 | 1 | auto / free | 1 |
-| L27 | 6 |  | 5×5 | river, station×1 | 4×straight, 2×curve, 2×bridge | 6 | 2 | auto / free | 1 |
-| L28 | 6 |  | 5×5 | mountain, station×1 | 3×straight, 2×curve, 2×tunnel, 1×bridge | 6 | 2 | auto / free | 1 |
-| L29 | 6 | repair | 5×5 | mountain, obstacles | 1×tunnel, 1×straight + 5 pre-laid | 5 | 2 | auto / free | 1 |
-| L30 | 7 | rotation | 3×3 | – | 1×straight | 1 | 0 | free / free | 1 |
-| L31 | 7 |  | 4×4 | obstacles | 2×straight, 3×curve | 5 | 0 | free / free | 2 |
-| L32 | 7 |  | 5×4 | river | 3×straight, 3×curve | 6 | 0 | free / free | 1 |
-| L33 | 7 | repair | 5×4 | obstacles | 1×straight + 6 pre-laid | 6 | 1 | free / free | 2 |
-| L34 | 8 |  | 5×5 | river, mountain | 4×straight, 2×curve, 1×bridge, 1×tunnel | 7 | 1 | free / free | 2 |
-| L35 | 8 |  | 5×5 | mountain, station×1, obstacles | 4×straight, 4×curve, 1×tunnel, 1×bridge | 8 | 2 | free / free | 2 |
-| L36 | 8 |  | 5×5 | river, station×1 | 6×straight, 2×curve, 2×bridge, 1×tunnel | 10 | 1 | free / free | 1 |
-| L37 | 8 | repair | 5×6 | river, mountain, station×1 | 1×bridge, 1×curve + 7 pre-laid | 7 | 2 | free / free | 1 |
-| L38 | 8 |  | 5×6 | river, mountain, station×1, obstacles | 5×straight, 3×curve, 1×tunnel, 1×bridge | 9 | 1 | free / free | 1 |
-| L39 | 8 |  | 5×6 | river, station×2 | 5×straight, 5×curve, 1×bridge, 1×tunnel | 10 | 2 | free / free | 1 |
-| L40 | 8 |  | 5×6 | river, mountain, station×1, obstacles | 5×straight, 5×curve, 2×bridge, 1×tunnel | 11 | 2 | free / free | 1 |
+| id | kind | ch | board | inventory | minLen | distractors | solutions | naiveLen | detour | countSlack | planDepth | lures | faults | mechanics |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| L01 | practice | 1 | 5×4 | 2s 3c | 5 | 0 | 1 | 3 | 2 | 0 | 2 | 0 | 0 | – |
+| L02 | practice | 1 | 5×4 | 4s 3c | 7 | 0 | 1 | 5 | 2 | 0 | 3 | 0 | 0 | – |
+| L03 | practice | 1 | 5×5 | 6c | 6 | 0 | 1 | 2 | 4 | 2 | 2 | 0 | 0 | – |
+| L04 | intro: rotation | 1 | 5×4 | 2s 3c | 5 | 0 | 1 | 3 | 2 | 0 | 2 | 0 | 0 | – |
+| L05 | practice | 1 | 5×5 | 3s 4c | 7 | 0 | 2 | 5 | 2 | 0 | 3 | 0 | 0 | – |
+| L06 | practice | 1 | 5×5 | 4s 5c | 8 | 1 | 1 | 6 | 2 | 0 | 3 | 0 | 0 | – |
+| L07 | intro: bridge | 2 | 5×5 | 1s 4c 1b | 6 | 0 | 1 | 6 | 0 | 0 | 2 | 0 | 0 | bridge |
+| L08 | practice | 2 | 5×6 | 4s 3c 3b | 8 | 2 | 1 | 4 | 4 | 0 | 2 | 2 | 0 | bridge |
+| L09 | practice | 2 | 5×5 | 2s 7c 1b | 8 | 2 | 1 | 6 | 2 | 0 | 3 | 0 | 0 | bridge |
+| L10 | practice | 2 | 5×6 | 4s 5c 1b | 9 | 1 | 1 | 3 | 6 | 0 | 3 | 0 | 0 | bridge |
+| L11 | practice | 2 | 5×6 | 2s 6c 2b | 8 | 2 | 1 | 6 | 2 | 0 | 4 | 1 | 0 | bridge |
+| L12 | repair | 2 | 5×5 | 3s 4c 2b (4 pre-laid) | 7 | 2 | 1 | 3 | 4 | 0 | 3 | 1 | 1 | bridge |
+| L13 | intro: tunnel | 3 | 5×5 | 3s 5c 2t | 10 | 0 | 1 | 2 | 8 | 0 | 3 | 0 | 0 | tunnel |
+| L14 | practice | 3 | 5×5 | 3s 5c 3t | 9 | 2 | 1 | 3 | 6 | 0 | 3 | 1 | 0 | tunnel |
+| L15 | practice | 3 | 5×5 | 2s 6c 4t | 9 | 3 | 1 | 5 | 4 | 0 | 3 | 2 | 0 | tunnel |
+| L16 | practice | 3 | 5×5 | 5s 4c 2t | 10 | 1 | 1 | 6 | 4 | 0 | 3 | 0 | 0 | tunnel |
+| L17 | practice | 3 | 5×5 | 3s 7c 3t | 11 | 2 | 1 | 1 | 10 | 0 | 4 | 1 | 0 | tunnel |
+| L18 | repair | 3 | 5×6 | 4s 8c 2t (11 pre-laid) | 12 | 2 | 1 | 6 | 6 | 2 | 4 | 0 | 3 | tunnel |
+| L19 | intro: station | 4 | 5×6 | 4s 5c | 9 | 0 | 1 | 3 | 6 | 0 | 3 | 0 | 0 | station |
+| L20 | practice | 4 | 6×6 | 4s 6c 1b | 9 | 2 | 2 | 4 | 5 | 0 | 3 | 1 | 0 | station |
+| L21 | practice | 4 | 6×6 | 4s 6c 2b 1t | 10 | 3 | 2 | 6 | 4 | 0 | 3 | 1 | 0 | bridge, tunnel, station |
+| L22 | practice | 4 | 6×6 | 6s 6c 2t | 12 | 2 | 1 | 5 | 7 | 0 | 4 | 2 | 0 | station |
+| L23 | practice | 4 | 5×6 | 7s 8c | 12 | 3 | 1 | 5 | 7 | 0 | 5 | 0 | 0 | station |
+| L24 | repair | 4 | 5×6 | 8s 6c (10 pre-laid) | 11 | 3 | 2 | 2 | 9 | 0 | 4 | 0 | 3 | station |
+| L25 | practice | 5 | 6×6 | 6s 6c 1b 1t | 11 | 3 | 1 | 1 | 10 | 0 | 4 | 2 | 0 | – |
+| L26 | practice | 5 | 6×6 | 4s 8c 1b 1t | 11 | 3 | 1 | 7 | 4 | 0 | 5 | 1 | 0 | bridge |
+| L27 | practice | 5 | 6×6 | 7s 7c 1b 1t | 12 | 4 | 2 | 8 | 4 | 0 | 5 | 1 | 0 | bridge |
+| L28 | practice | 5 | 6×6 | 9s 5c 1b 1t | 12 | 4 | 2 | 6 | 6 | 0 | 5 | 1 | 0 | bridge |
+| L29 | practice | 5 | 6×6 | 6s 7c 1b 1t | 11 | 4 | 1 | 1 | 10 | 0 | 6 | 1 | 0 | tunnel |
+| L30 | repair | 5 | 6×6 | 7s 8c 1b 1t (10 pre-laid) | 14 | 3 | 2 | 4 | 10 | 0 | 5 | 1 | 3 | bridge |
+| L31 | intro: oneWay | 6 | 6×6 | 3s 5c 1b | 9 | 0 | 1 | 6 | 3 | 0 | 2 | 0 | 0 | bridge, arrow |
+| L32 | practice | 6 | 6×7 | 6s 5c 1b 3t | 12 | 3 | 2 | 7 | 5 | 0 | 5 | 2 | 0 | bridge, tunnel |
+| L33 | practice | 6 | 6×6 | 3s 9c 1b 2t | 12 | 3 | 2 | 7 | 5 | 0 | 5 | 2 | 0 | bridge |
+| L34 | practice | 6 | 6×6 | 9s 4c 3t | 13 | 3 | 1 | 3 | 10 | 0 | 5 | 2 | 0 | tunnel |
+| L35 | practice | 6 | 6×7 | 4s 9c 2t | 11 | 4 | 2 | 3 | 8 | 0 | 6 | 1 | 0 | tunnel |
+| L36 | repair | 6 | 6×6 | 10s 6c (7 pre-laid) | 13 | 3 | 1 | 7 | 6 | 0 | 5 | 0 | 3 | – |
+| L37 | intro: order | 7 | 6×6 | 5s 7c | 12 | 0 | 1 | 4 | 8 | 0 | 5 | 0 | 0 | station, order |
+| L38 | practice | 7 | 6×6 | 9s 9c | 14 | 4 | 1 | 2 | 12 | 0 | 5 | 0 | 0 | station, order |
+| L39 | practice | 7 | 6×6 | 9s 8c | 13 | 4 | 1 | 5 | 8 | 0 | 6 | 0 | 0 | station, order |
+| L40 | practice | 7 | 6×6 | 9s 9c | 14 | 4 | 1 | 5 | 9 | 0 | 7 | 0 | 0 | station, order |
+| L41 | practice | 7 | 6×6 | 9s 9c | 15 | 3 | 2 | 4 | 11 | 0 | 8 | 0 | 0 | station, order |
+| L42 | repair | 7 | 6×7 | 7s 8c 2b (13 pre-laid) | 14 | 3 | 1 | 4 | 10 | 0 | 5 | 2 | 2 | station, order |
+| L43 | practice | 8 | 6×7 | 5s 8c 2b 4t | 14 | 5 | 1 | 5 | 9 | 0 | 6 | 4 | 0 | bridge, tunnel, station |
+| L44 | practice | 8 | 6×7 | 8s 9c 2b 3t | 17 | 5 | 1 | 8 | 9 | 0 | 7 | 3 | 0 | bridge, tunnel, station, order |
+| L45 | practice | 8 | 6×7 | 4s 9c 4b 3t | 15 | 5 | 1 | 8 | 7 | 0 | 9 | 5 | 0 | bridge, tunnel, station |
+| L46 | practice | 8 | 6×7 | 9s 9c 2b 1t | 17 | 4 | 1 | 5 | 12 | 0 | 9 | 2 | 0 | bridge, station, order |
+| L47 | practice | 8 | 6×7 | 7s 9c 4b 3t | 18 | 5 | 2 | 7 | 11 | 0 | 9 | 4 | 0 | bridge, tunnel, station |
+| L48 | finale | 8 | 6×7 | 7s 8c 1b 4t | 16 | 4 | 1 | 8 | 8 | 0 | 9 | 3 | 0 | bridge, tunnel, station, order |
+| L08s | sibling of L08 | 2 | 5×5 | 1s 4c 1b | 6 | 0 | 1 | 4 | 2 | 0 | 1 | 0 | 0 | bridge |
+| L09s | sibling of L09 | 2 | 5×6 | 4c 1b | 5 | 0 | 2 | 3 | 2 | 2 | 1 | 0 | 0 | bridge |
+| L10s | sibling of L10 | 2 | 5×6 | 2s 3c 1b | 6 | 0 | 1 | 4 | 2 | 0 | 1 | 0 | 0 | bridge |
+| L11s | sibling of L11 | 2 | 5×5 | 4c 1b | 5 | 0 | 1 | 3 | 2 | 0 | 1 | 0 | 0 | bridge |
+| L14s | sibling of L14 | 3 | 6×6 | 2s 2c 2t | 6 | 0 | 1 | 2 | 4 | 0 | 1 | 0 | 0 | tunnel |
+| L15s | sibling of L15 | 3 | 5×5 | 4c 3t | 6 | 1 | 1 | 4 | 2 | 0 | 1 | 1 | 0 | tunnel |
+| L16s | sibling of L16 | 3 | 5×5 | 1s 4c 2t | 7 | 0 | 2 | 5 | 2 | 0 | 1 | 0 | 0 | tunnel |
+| L17s | sibling of L17 | 3 | 5×5 | 1s 3c 2t | 6 | 0 | 1 | 2 | 4 | 0 | 2 | 0 | 0 | tunnel |
+| L20s | sibling of L20 | 4 | 6×6 | 1s 5c 1b | 7 | 0 | 1 | 5 | 2 | 0 | 1 | 0 | 0 | bridge, station |
+| L21s | sibling of L21 | 4 | 5×6 | 5s 4c | 8 | 1 | 1 | 1 | 7 | 0 | 1 | 0 | 0 | station |
+| L22s | sibling of L22 | 4 | 5×6 | 5s 4c | 9 | 0 | 1 | 5 | 4 | 0 | 1 | 0 | 0 | station |
+| L23s | sibling of L23 | 4 | 6×6 | 4s 4c 1b | 8 | 1 | 1 | 4 | 4 | 0 | 3 | 0 | 0 | bridge, station |
+| L25s | sibling of L25 | 5 | 6×6 | 2s 5c 1b 1t | 8 | 1 | 1 | 4 | 4 | 0 | 1 | 1 | 0 | bridge |
+| L26s | sibling of L26 | 5 | 6×6 | 2s 4c 1b 1t | 7 | 1 | 1 | 5 | 2 | 0 | 2 | 1 | 0 | bridge |
+| L27s | sibling of L27 | 5 | 6×6 | 2s 3c 1b 1t | 5 | 2 | 1 | 1 | 4 | 0 | 1 | 2 | 0 | – |
+| L28s | sibling of L28 | 5 | 6×6 | 2s 5c 1b 1t | 7 | 2 | 1 | 5 | 2 | 0 | 3 | 1 | 0 | bridge |
+| L29s | sibling of L29 | 5 | 6×6 | 4s 4c 1b 1t | 8 | 2 | 1 | 2 | 6 | 0 | 2 | 1 | 0 | bridge |
+| L32s | sibling of L32 | 6 | 6×6 | 5s 4c | 8 | 1 | 1 | 6 | 2 | 0 | 3 | 0 | 0 | – |
+| L33s | sibling of L33 | 6 | 6×7 | 3s 3c | 6 | 0 | 1 | 3 | 3 | 0 | 3 | 0 | 0 | – |
+| L34s | sibling of L34 | 6 | 6×6 | 2s 4c | 6 | 0 | 1 | 3 | 3 | 0 | 3 | 0 | 0 | – |
+| L35s | sibling of L35 | 6 | 6×7 | 5s 3c | 7 | 1 | 1 | 4 | 3 | 0 | 1 | 0 | 0 | – |
+| L38s | sibling of L38 | 7 | 6×7 | 7s 7c | 12 | 2 | 1 | 3 | 9 | 0 | 2 | 0 | 0 | station, order |
+| L39s | sibling of L39 | 7 | 6×6 | 4s 7c | 11 | 0 | 1 | 5 | 6 | 0 | 2 | 0 | 0 | station, order |
+| L40s | sibling of L40 | 7 | 6×7 | 3s 9c | 12 | 0 | 2 | 4 | 8 | 0 | 1 | 0 | 0 | station, order |
+| L41s | sibling of L41 | 7 | 6×7 | 4s 8c | 11 | 1 | 1 | 4 | 7 | 0 | 5 | 0 | 0 | station, order |
+| L43s | sibling of L43 | 8 | 6×7 | 3s 4c 1b 1t | 7 | 2 | 2 | 5 | 2 | 0 | 1 | 0 | 0 | bridge, tunnel, station |
+| L44s | sibling of L44 | 8 | 6×7 | 8s 5c 1b 3t | 15 | 2 | 1 | 8 | 7 | 0 | 1 | 1 | 0 | bridge, tunnel, station, order |
+| L45s | sibling of L45 | 8 | 6×7 | 5s 8c 1b 2t | 13 | 3 | 1 | 3 | 10 | 0 | 3 | 1 | 0 | bridge, tunnel, station |
+| L46s | sibling of L46 | 8 | 6×7 | 5s 8c 1b 1t | 15 | 0 | 1 | 6 | 9 | 0 | 2 | 0 | 0 | bridge, tunnel, station, order |
+| L47s | sibling of L47 | 8 | 6×7 | 5s 5c 2b 2t | 11 | 3 | 2 | 8 | 3 | 0 | 1 | 2 | 0 | bridge, tunnel, station |
+| L48s | sibling of L48 | 8 | 6×7 | 7s 5c 2b | 12 | 2 | 1 | 5 | 7 | 0 | 1 | 1 | 0 | bridge, station, order |
