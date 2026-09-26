@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { Level } from '../src/game/level';
+import { nextHint, plan } from '../src/game/hints';
+import { solve } from '../src/game/solver';
 import { trace } from '../src/game/trace';
 import { P } from './helpers';
 
 const base = (grid: string[], extra: Partial<Level> = {}): Level => ({
   id: 'L99',
   chapter: 1,
+  kind: 'practice',
   grid,
   start: { exit: 'E' },
   depot: { entry: 'W' },
@@ -77,5 +80,62 @@ describe('trace: every reason', () => {
 
   it('a start that points straight into the depot needs no piece', () => {
     expect(trace(base(['AB']), []).success).toBe(true);
+  });
+});
+
+describe('v3 trace reasons', () => {
+  // A one-way straight in the middle of the only row.
+  const oneWay = (dir: 'E' | 'W') => base(['A..B'], { fixed: [{ at: [2, 0], piece: 'straight', openings: 'EW', oneWay: dir }] });
+
+  it('wrongWay: entering against the arrow stops the train before that cell', () => {
+    const r = trace(oneWay('W'), [P(1, 0, 'straight', 'EW')]);
+    expect(r).toMatchObject({ success: false, reason: 'wrongWay', stopCell: { x: 1, y: 0 }, breakCell: { x: 2, y: 0 } });
+    expect(r.path).toEqual([{ x: 1, y: 0 }]);
+    expect(trace(oneWay('E'), [P(1, 0, 'straight', 'EW')]).success).toBe(true);
+  });
+
+  it('wrongWay on a one-way curve: only leaving by the arrow side is allowed', () => {
+    const l = base(['A.', '.B'], { depot: { entry: 'N' }, fixed: [{ at: [1, 0], piece: 'curve', openings: 'SW', oneWay: 'W' }] });
+    expect(trace(l, [])).toMatchObject({ reason: 'wrongWay', breakCell: { x: 1, y: 0 } });
+    const ok = base(['A.', '.B'], { depot: { entry: 'N' }, fixed: [{ at: [1, 0], piece: 'curve', openings: 'SW', oneWay: 'S' }] });
+    expect(trace(ok, []).success).toBe(true);
+  });
+
+  const ordered = (a: 1 | 2, b: 1 | 2) =>
+    base(['AS.SB'], {
+      stations: [
+        { at: [1, 0], openings: 'EW', order: a },
+        { at: [3, 0], openings: 'EW', order: b },
+      ],
+    });
+
+  it('wrongOrder: reaching a station before a lower-numbered one stops the run there; both are reported', () => {
+    const r = trace(ordered(2, 1), [P(2, 0, 'straight', 'EW')]);
+    expect(r).toMatchObject({ success: false, reason: 'wrongOrder', breakCell: { x: 1, y: 0 }, stopCell: { x: 0, y: 0 }, missingStations: [{ x: 3, y: 0 }] });
+    expect(trace(ordered(1, 2), [P(2, 0, 'straight', 'EW')]).success).toBe(true);
+  });
+
+  it('missedStation still applies to ordered levels', () => {
+    const l = base(['A..B', '.S..'], { stations: [{ at: [1, 1], openings: 'EW', order: 1 }] });
+    expect(trace(l, [P(1, 0, 'straight', 'EW'), P(2, 0, 'straight', 'EW')])).toMatchObject({ reason: 'missedStation' });
+  });
+
+  it('the solver and the hints respect arrows and order', () => {
+    expect(solve(oneWay('W'), { cap: 5 })).toEqual([]);
+    expect(solve(oneWay('E'), { cap: 5 })).toHaveLength(1);
+    expect(solve(ordered(2, 1), { cap: 5 })).toEqual([]);
+    expect(solve(ordered(1, 2), { cap: 5 })).toEqual([[P(2, 0, 'straight', 'EW')]]);
+    // Round a rock: the top way has an arrow against the travel, so the hints go the bottom way.
+    const round = base(['.....', 'A.R.B', '.....'], {
+      tray: [{ piece: 'straight', count: 1 }, { piece: 'curve', count: 4 }],
+      fixed: [{ at: [2, 0], piece: 'straight', openings: 'EW', oneWay: 'W' }],
+    });
+    const p = plan(round, []);
+    expect(trace(round, p.completion).success).toBe(true);
+    expect(p.completion.some((q) => q.at[0] === 2 && q.at[1] === 2)).toBe(true);
+    expect(solve(round, { cap: 5 })).toHaveLength(1);
+    expect(solve({ ...round, fixed: [{ ...round.fixed![0], oneWay: 'E' }] }, { cap: 5 })).toHaveLength(2);
+    const h = nextHint(ordered(1, 2), []);
+    expect(h).toEqual({ type: 'place', cell: { x: 2, y: 0 }, piece: 'straight', openings: 'EW' });
   });
 });

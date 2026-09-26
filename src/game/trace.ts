@@ -2,7 +2,7 @@
 // Pure. The UI animates the train along `path`, stops it at `stopCell`, glows `breakCell`.
 
 import { type Cell, type Dir, cellKey, inBounds, opposite, sameCell, step } from './grid';
-import { type Level, type PieceAt, type Placed, boardOf, cellOf, hasOpening, otherOpening, terrainAccepts, terrainAt } from './level';
+import { type Level, type PieceAt, type Placed, boardOf, cellOf, hasOpening, otherOpening, sideDir, terrainAccepts, terrainAt } from './level';
 
 export type FailReason =
   | 'edge' // the track points off the board
@@ -13,6 +13,8 @@ export type FailReason =
   | 'needsTrack' // a bridge or tunnel on grass
   | 'depotSide' // reached the depot from the wrong side
   | 'missedStation' // reached the depot without passing every station
+  | 'wrongWay' // entered a one-way piece against its arrow
+  | 'wrongOrder' // reached a station before a lower-numbered one
   | 'loop' // the track runs back into itself
   | 'overflow';
 
@@ -27,7 +29,10 @@ export interface TraceResult {
   /** The cell that stopped the train (glows softly), if any. */
   breakCell: Cell | null;
   reason: FailReason | null;
-  /** Stations not on the path (only reported when the depot was reached). */
+  /**
+   * missedStation: stations not on the path. wrongOrder: the lower-numbered stations not
+   * passed yet (the reached station is `breakCell`).
+   */
   missingStations: Cell[];
   /** Direction the train was heading when it stopped. */
   heading: Dir;
@@ -50,6 +55,7 @@ export function trace(level: Level, pieces: readonly Placed[]): TraceResult {
   let dir: Dir = b.startExit;
   const path: Cell[] = [];
   const seen = new Set<string>([cellKey(pos)]);
+  let passed = 0; // stations passed so far (ordered levels: the next order is passed + 1)
   const fail = (reason: FailReason, breakCell: Cell | null, missingStations: Cell[] = []): TraceResult => ({
     success: false,
     reached: false,
@@ -77,9 +83,18 @@ export function trace(level: Level, pieces: readonly Placed[]): TraceResult {
     if (!hasOpening(p.openings, entry)) return fail('mismatch', nxt);
     if (!terrainAccepts(terrainAt(level, nxt), p.piece)) return fail(terrainReason(level, nxt), nxt);
     if (seen.has(cellKey(nxt))) return fail('loop', nxt);
+    const exit = otherOpening(p.openings, entry);
+    if ('oneWay' in p && p.oneWay && sideDir(p.oneWay) !== exit) return fail('wrongWay', nxt);
+    if (p.piece === 'station') {
+      if (b.ordered && p.order !== passed + 1) {
+        const lower = (level.stations ?? []).filter((s) => (s.order ?? 0) < (p.order ?? 0) && !path.some((c) => c.x === s.at[0] && c.y === s.at[1]));
+        return fail('wrongOrder', nxt, lower.map((s) => cellOf(s.at)));
+      }
+      passed++;
+    }
     seen.add(cellKey(nxt));
     path.push(nxt);
-    dir = otherOpening(p.openings, entry);
+    dir = exit;
     pos = nxt;
   }
   return fail('overflow', null);
