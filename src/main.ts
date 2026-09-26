@@ -1,9 +1,10 @@
 // App shell: setup (parent) → intro picture → a session of 4 puzzle levels → depot ride → END.
-// Locked until tomorrow afterwards (hidden 3 s hold on the heading overrides).
+// Locked until tomorrow afterwards. A hidden 3 s hold on the END / LOCKED heading (or on the
+// setup title) opens the parent menu: level preview, and on END / LOCKED the v2 unlock.
 
 import './style.css';
 import { dayKey, isLocked, markSessionEnded, UNLOCKED } from './game/lock';
-import { LEVEL_COUNT, LEVELS } from './game/levels';
+import { ALL_LEVELS, LEVEL_COUNT } from './game/levels';
 import { type Bookmark, type SessionRun, SLOTS, endSession, finishLevel, levelForSlot, progressCount, startSession } from './game/progress';
 import { type CardId, CARD_IDS, type Lang, LANGS, type T, translator } from './i18n';
 import { SoftAudio } from './platform/audio';
@@ -11,6 +12,7 @@ import { deletePhoto, getPhoto, savePhoto, shrinkPhoto } from './platform/photos
 import { type Settings, loadBookmark, loadLock, loadSettings, saveBookmark, saveLock, saveSettings } from './platform/settings';
 import { cardIcon } from './ui/art';
 import { mountLevel } from './ui/game';
+import { showParentMenu } from './ui/parent';
 import { depotRideScene, introScene } from './ui/scenes';
 import { attachHold } from './ui/longpress';
 import { h } from './ui/svg';
@@ -132,11 +134,15 @@ async function showSetup() {
     recent,
   );
 
+  // Hidden 3 s hold on the title: the parent menu (preview only; nothing to unlock here).
+  const title = h('h1', {}, t('appTitle'));
+  attachHold(title, () => openParentMenu(false, () => void showSetup()));
+
   show(
     h(
       'main',
       { class: 'screen setup' },
-      h('h1', {}, t('appTitle')),
+      title,
       h('h2', {}, t('setupHeading')),
       h('p', { class: 'hint' }, t('setupHint')),
       cards,
@@ -171,7 +177,7 @@ function showSession(t: T) {
   const card = settings.card;
   const day = dayKey(new Date());
   let bm: Bookmark = loadBookmark();
-  let run: SessionRun = startSession(LEVELS, bm, day);
+  let run: SessionRun = startSession(ALL_LEVELS, bm, day);
   let ended = false;
   void keepAwake(true);
 
@@ -196,10 +202,10 @@ function showSession(t: T) {
     cleanup = mountLevel(screen, {
       t,
       audio,
-      level: levelForSlot(LEVELS, run.current),
+      level: levelForSlot(ALL_LEVELS, run.current),
       wagons: SLOTS - run.slot,
       onSolved: (result) => {
-        const r = finishLevel(LEVELS, bm, run, result);
+        const r = finishLevel(ALL_LEVELS, bm, run, result);
         bm = r.bm;
         run = r.run;
         saveBookmark(bm);
@@ -213,13 +219,31 @@ function showSession(t: T) {
   play();
 }
 
-// ---------- END / locked ----------
-/** The heading doubles as the hidden parent override (hold 3 s). No visible button. */
-function withOverride(heading: HTMLElement): HTMLElement {
-  attachHold(heading, () => {
-    saveLock(UNLOCKED);
-    void showSetup();
+// ---------- parent menu ----------
+/** Parent menu (words allowed). Preview writes nothing except "Ustaw jako następny". */
+function openParentMenu(canUnlock: boolean, back: () => void) {
+  const screen = h('div', { class: 'parent-root' });
+  show(screen);
+  cleanup = showParentMenu({
+    root: screen,
+    t: translator(settings.lang),
+    audio,
+    canUnlock,
+    // Exactly the v2 override: unlock, then go to setup.
+    onUnlock: () => {
+      saveLock(UNLOCKED);
+      void showSetup();
+    },
+    onBack: back,
+    loadBookmark,
+    saveBookmark,
   });
+}
+
+// ---------- END / locked ----------
+/** The heading doubles as the hidden parent menu (hold 3 s). No visible button. */
+function withOverride(heading: HTMLElement, back: () => void): HTMLElement {
+  attachHold(heading, () => openParentMenu(true, back));
   return heading;
 }
 
@@ -228,7 +252,7 @@ function showEnd(t: T, card: CardId) {
     h(
       'main',
       { class: 'screen end' },
-      withOverride(h('h1', { class: 'end-title' }, t('endTitle'), ' ', t('endNow'))),
+      withOverride(h('h1', { class: 'end-title' }, t('endTitle'), ' ', t('endNow')), () => showEnd(t, card)),
       cardView(card, photoUrl, t, true),
     ),
   );
@@ -243,7 +267,7 @@ async function showLocked() {
       'main',
       { class: 'screen locked' },
       h('div', { class: 'moon', 'aria-hidden': 'true' }),
-      withOverride(h('h1', {}, t('lockedTitle'))),
+      withOverride(h('h1', {}, t('lockedTitle')), () => void showLocked()),
       h('p', { class: 'lead' }, t('lockedSub')),
       h('p', { class: 'lead small' }, t('endNow')),
       cardView(settings.card, url, t),

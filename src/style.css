@@ -897,3 +897,151 @@ h3 {
     animation-duration: var(--look) !important;
   }
 }
+
+/* ---------- v3: lakes, one-way arrows, ordered stations, hint marks ---------- */
+.lake-water {
+  fill: var(--water);
+  stroke: #8cc4e8;
+  stroke-width: 4;
+}
+.lake-shine {
+  fill: #e3f3fd;
+  opacity: 0.8;
+}
+.lily {
+  fill: #9ccf8a;
+  stroke: #7fb77e;
+  stroke-width: 2;
+}
+.arrow-disc {
+  fill: #fffaf0;
+  stroke: #d8c7a6;
+  stroke-width: 3;
+}
+.arrow {
+  fill: #4aa3a0;
+}
+.one-way.pulse,
+.order-dots.pulse {
+  animation: soft-pulse 1.4s ease-in-out 4;
+}
+.order-dot {
+  fill: #fffaf0;
+  stroke: #3f6f8a;
+  stroke-width: 2;
+}
+.half-flag .flag-glow {
+  fill: rgb(255 250 235 / 0.55);
+  animation: soft-pulse 1.8s ease-in-out infinite;
+}
+.flag-pole {
+  stroke: #6b7280;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.flag-cloth {
+  fill: #f4a259;
+}
+.hint-piece {
+  opacity: 0.5;
+  animation: breathe-ghost 2.4s ease-in-out infinite;
+}
+.intro-glow {
+  fill: rgb(255 250 235 / 0.45);
+  stroke: #fff6dc;
+  stroke-width: 5;
+  animation: soft-pulse 1.8s ease-in-out 4;
+}
+/* Wrong side of the depot: the door arch glows softly. */
+.door-arch {
+  transition: fill 600ms ease;
+}
+.roof.door-glow .door-arch {
+  fill: #fff1c9;
+  animation: soft-pulse 1.4s ease-in-out 4;
+}
+.tray-item.empty.need {
+  opacity: 0.8;
+  animation: soft-pulse 1.4s ease-in-out 4;
+}
+
+/* ---------- v3: parent menu and preview (parent-facing: words allowed) ---------- */
+.parent-menu {
+  justify-content: center;
+  gap: 18px;
+}
+.parent-menu .btn {
+  min-width: 240px;
+}
+.parent-list {
+  gap: 10px;
+}
+.preview-chapter {
+  width: 100%;
+}
+.preview-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+  border-top: 1px solid #eadfca;
+}
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+.preview-item.is-sibling {
+  margin-left: 18px;
+  width: calc(100% - 18px);
+  background: #fbf6ec;
+}
+.preview-stats {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.preview-marks {
+  font-size: 0.8rem;
+  color: var(--parent);
+  font-weight: 600;
+}
+.set-next {
+  align-self: flex-end;
+  font-size: 0.8rem;
+  min-height: 36px;
+}
+.preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 6px;
+  width: 100%;
+  flex: none;
+}
+.preview-bar .btn {
+  min-height: 40px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.preview-badge {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--parent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}

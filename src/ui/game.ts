@@ -4,14 +4,16 @@
 
 import { type Cell, E, cellKey } from '../game/grid';
 import { type Hint, ghostPath, nextHint, plan } from '../game/hints';
-import { type Level, type PieceKind, type Placed, boardOf, goalStripOf, initialPieces, terrainAt, trayOrientation } from '../game/level';
+import { type Level, type PieceKind, type Placed, boardOf, goalStripOf, initialPieces, kindOf, sideDir, terrainAt, trayOrientation } from '../game/level';
 import { drop, move, pieceOn, placeGhost, takeBack, trayView, turn } from '../game/placement';
+import { handFor } from '../game/solver';
 import type { LevelResult } from '../game/progress';
 import { type TraceResult, trace } from '../game/trace';
 import type { T } from '../i18n';
 import type { SoftAudio } from '../platform/audio';
 import {
   CELL,
+  arrowArt,
   avatarArt,
   continueIcon,
   depotFloorArt,
@@ -19,8 +21,10 @@ import {
   depotRoofArt,
   endIcon,
   engineArt,
+  flagArt,
   goIcon,
   lampArt,
+  orderDots,
   pauseIcon,
   pieceArt,
   pieceIcon,
@@ -43,7 +47,7 @@ export const TIMING = {
   cooldownMs: 3000,
   /** No input for this long counts as being stuck once. */
   idleStuckMs: 90_000,
-  /** Intro levels: show the lamp-2 hint if no correct piece is down by then. */
+  /** Intro levels: glow the introduced element if no correct piece is down by then. */
   introPromptMs: 10_000,
   /** Press and hold a placed piece this long to send it back to the tray. */
   holdReturnMs: 500,
@@ -61,6 +65,11 @@ export interface LevelDeps {
   /** Parent chose "end session" on the pause screen. */
   onEndSession: () => void;
   timing?: Partial<typeof TIMING>;
+  /**
+   * Parent preview (sandbox): a parent bar above the board (the only words on this screen),
+   * and `showSolution` is filled in so the bar can play a ghost of the stored solution.
+   */
+  preview?: { bar: HTMLElement; controls: { showSolution?: () => void } };
 }
 
 type Phase = 'look' | 'build' | 'riding' | 'done';
@@ -97,6 +106,10 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
   let helped = false;
   let ghostMode = false;
   let shownHint: { hint: Hint; strong: boolean } | null = null;
+  /** First lamp: the halfway flag (or, on a short route, the next cell). */
+  let shownFlag: Cell | null = null;
+  let flagUsed = false;
+  let solutionGhost = false;
   const timers = new Set<number>();
   const later = (fn: () => void, ms: number) => {
     const id = window.setTimeout(() => {
@@ -161,16 +174,25 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
 
   const screen = h(
     'main',
-    { class: 'screen game looking' },
+    { class: `screen game looking${deps.preview ? ' previewing' : ''}` },
+    deps.preview?.bar ?? null,
     h('header', { class: 'topbar' }, pauseCtl, h('div', { class: 'topbar-mid' }, wagons, goal), helper),
     boardWrap,
     h('footer', { class: 'bottombar' }, tray, goBtn),
   );
   screen.style.setProperty('--look', `${tm.lookMs}ms`);
   root.replaceChildren(screen);
+  if (deps.preview) {
+    deps.preview.controls.showSolution = () => {
+      solutionGhost = !solutionGhost;
+      renderPieces();
+    };
+  }
 
   const fit = () => {
-    const px = tileSize(b.cols, b.rows, window.innerWidth || 360, window.innerHeight || 640);
+    // Parent preview: the bar (one or two rows) takes its height from the board's space.
+    const barPx = deps.preview ? Math.ceil(deps.preview.bar.getBoundingClientRect().height || 48) + 8 : 0;
+    const px = tileSize(b.cols, b.rows, window.innerWidth || 360, (window.innerHeight || 640) - barPx);
     boardWrap.style.width = `${px * b.cols}px`;
     boardWrap.style.height = `${px * b.rows}px`;
     screen.style.setProperty('--tile', `${px}px`);
@@ -190,7 +212,10 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
     }
   for (const p of b.fixed.values()) {
     const cls = p.piece === 'station' ? 'station-cell' : 'fixed-cell';
-    L.track.append(cellG({ x: p.at[0], y: p.at[1] }, pieceArt(p.piece, p.openings), `${cls} k-${p.at[0]}-${p.at[1]}`));
+    const art = pieceArt(p.piece, p.openings);
+    if (p.oneWay) art.append(arrowArt(sideDir(p.oneWay)));
+    if (p.order) art.append(orderDots(p.order, p.openings));
+    L.track.append(cellG({ x: p.at[0], y: p.at[1] }, art, `${cls} k-${p.at[0]}-${p.at[1]}`));
   }
   const roof = cellG(b.depot, depotRoofArt(b.depotEntry), 'roof');
   L.roof.append(roof);
@@ -215,6 +240,7 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
     justPlaced = null;
     L.ghosts.replaceChildren();
     if (ghostMode) for (const g of ghostPath(level, pieces)) L.ghosts.append(cellG({ x: g.at[0], y: g.at[1] }, pieceArt(g.piece, g.openings), 'ghost-piece'));
+    if (solutionGhost) for (const g of level.solution) L.ghosts.append(cellG({ x: g.at[0], y: g.at[1] }, pieceArt(g.piece, g.openings), 'ghost-piece solution-ghost'));
   }
 
   function renderTray() {
@@ -239,18 +265,27 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
   }
 
   function renderMarks() {
-    L.marks.querySelectorAll('.hint-mark').forEach((m) => m.remove());
+    L.marks.querySelectorAll('.hint-mark, .half-flag-g, .hint-piece').forEach((m) => m.remove());
     tray.querySelectorAll('.hinted').forEach((m) => m.classList.remove('hinted'));
+    if (shownFlag) L.marks.append(cellG(shownFlag, flagArt(), 'half-flag-g'));
     if (!shownHint) return;
     const hint = shownHint.hint;
     const mark = (c: Cell, cls: string) =>
       L.marks.append(s('rect', { class: `hint-mark ${cls}`, x: c.x * CELL + 5, y: c.y * CELL + 5, width: 90, height: 90, rx: 16 }));
+    // Lamp 2 also outlines the piece in its correct orientation (only a drawing: nothing moves).
+    const outline = (c: Cell, piece: PieceKind, o: Placed['openings']) => L.marks.append(cellG(c, pieceArt(piece, o), 'hint-piece'));
     if (hint.type === 'place') {
       mark(hint.cell, 'hint-cell');
-      if (shownHint.strong) tray.querySelector(`[data-kind="${hint.piece}"]`)?.classList.add('hinted');
+      if (shownHint.strong) {
+        tray.querySelector(`[data-kind="${hint.piece}"]`)?.classList.add('hinted');
+        outline(hint.cell, hint.piece, hint.openings);
+      }
     } else if (hint.type === 'change') {
       mark(hint.cell, 'hint-outline');
-      if (shownHint.strong) tray.querySelector(`[data-kind="${hint.piece}"]`)?.classList.add('hinted');
+      if (shownHint.strong) {
+        tray.querySelector(`[data-kind="${hint.piece}"]`)?.classList.add('hinted');
+        outline(hint.cell, hint.piece, hint.openings);
+      }
     } else if (hint.type === 'blocked') for (const c of hint.cells) mark(c, 'hint-outline');
   }
 
@@ -291,6 +326,7 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
       audio.play('place');
     }
     shownHint = null;
+    shownFlag = null;
     clearBreak();
     touched();
     render();
@@ -479,14 +515,32 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
     armed = false;
     lampsLeft--;
     lampsUsed++;
-    showHint(lampsUsed >= 2);
+    if (lampsUsed === 1) showFlag();
+    else showHint(true);
     renderHelper();
   }
 
+  /** Lamp 2: the v2 hint (cell glow + tray piece pulse) plus the piece outline. Lamp-free uses pass strong=false. */
   function showHint(strong: boolean) {
     const hint = nextHint(level, pieces);
     shownHint = hint.type === 'none' ? null : { hint, strong };
     renderMarks();
+  }
+
+  /**
+   * Lamp 1: a small flag on the halfway cell of the remaining route (completion[floor(n/2)]
+   * of plan() when n ≥ 3); on a shorter route, the next cell glows as in v2.
+   */
+  function showFlag() {
+    flagUsed = true;
+    const p = plan(level, pieces);
+    const n = p.completion.length;
+    if (n >= 3) {
+      const f = p.completion[Math.floor(n / 2)];
+      shownFlag = { x: f.at[0], y: f.at[1] };
+      shownHint = null;
+      renderMarks();
+    } else showHint(false);
   }
 
   function bumpStuck() {
@@ -496,7 +550,9 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
       void helper.offsetWidth;
       helper.classList.add('offer'); // the lamp pulses once: an offer, nothing more
     } else if (stuck === 3) {
-      showHint(false);
+      // The halfway flag, or the second-lamp hint if the flag was already shown.
+      if (flagUsed) showHint(true);
+      else showFlag();
     } else if (stuck >= 4 && !ghostMode) {
       ghostMode = true;
       helped = true;
@@ -512,10 +568,39 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
   // ---------- the test run ----------
   const goalLit = new Set<HTMLElement>();
   function clearBreak() {
-    L.marks.querySelectorAll('.break-mark').forEach((m) => m.remove());
-    roof.classList.remove('gate-shut');
+    L.marks.querySelectorAll('.break-mark, .intro-glow').forEach((m) => m.remove());
+    roof.classList.remove('gate-shut', 'door-glow');
     L.track.querySelectorAll('.station-cell').forEach((g) => g.classList.remove('missed'));
+    L.track.querySelectorAll('.pulse').forEach((g) => g.classList.remove('pulse'));
+    tray.querySelectorAll('.need').forEach((g) => g.classList.remove('need'));
     goalIcons.forEach((g) => g.el.classList.remove('missed'));
+  }
+
+  /** Every stop shows its cause (soft light only, never red). */
+  function showCause(tr: TraceResult) {
+    const at = (c: Cell) => L.track.querySelector(`.k-${c.x}-${c.y}`);
+    switch (tr.reason) {
+      case 'depotSide':
+        roof.classList.add('door-glow'); // the depot door glows
+        break;
+      case 'wrongWay':
+        if (tr.breakCell) at(tr.breakCell)?.querySelector('.one-way')?.classList.add('pulse');
+        break;
+      case 'wrongOrder':
+      case 'missedStation':
+        for (const c of [...(tr.reason === 'wrongOrder' && tr.breakCell ? [tr.breakCell] : []), ...tr.missingStations]) {
+          at(c)?.classList.add('missed');
+          at(c)?.querySelector('.order-dots')?.classList.add('pulse');
+        }
+        break;
+      case 'gap': {
+        // A gap before a river or mountain with no bridge / tunnel left: that empty tray slot pulses.
+        const tt = tr.breakCell ? terrainAt(level, tr.breakCell) : null;
+        const kind = tt === 'river' ? 'bridge' : tt === 'mountain' ? 'tunnel' : null;
+        if (kind && handFor(level, pieces)[kind] <= 0) tray.querySelector(`[data-kind="${kind}"]`)?.classList.add('need');
+        break;
+      }
+    }
   }
 
   function lightGoal(kind: 'bridge' | 'tunnel' | 'station') {
@@ -618,17 +703,16 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
     }
     if (tr.reason === 'missedStation') {
       roof.classList.add('gate-shut');
-      for (const m of tr.missingStations) L.track.querySelector(`.k-${m.x}-${m.y}`)?.classList.add('missed');
       const litStations = goalIcons.filter((g) => g.kind === 'station' && !goalLit.has(g.el));
       litStations.forEach((g) => g.el.classList.add('missed'));
     }
-    if (tr.reason === 'depotSide' && tr.breakCell) roof.classList.add('gate-shut');
     // Stuck ladder: a run that gets no further than before counts once.
     if (tr.path.length > best) {
       best = tr.path.length;
       stuck = 0;
     } else bumpStuck();
     render();
+    showCause(tr);
     later(() => {
       cooling = false;
       engine.classList.add('fade');
@@ -638,6 +722,24 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
       }, 450);
       render();
     }, tm.cooldownMs);
+  }
+
+  /** Intro levels: glow only the cells of the introduced element (river, mountain, arrow, first station). */
+  function glowIntro() {
+    const cells: Cell[] = [];
+    for (let y = 0; y < b.rows; y++)
+      for (let x = 0; x < b.cols; x++) {
+        const tt = terrainAt(level, { x, y });
+        if ((level.intro === 'bridge' && tt === 'river') || (level.intro === 'tunnel' && tt === 'mountain')) cells.push({ x, y });
+      }
+    const fixed = [...b.fixed.values()];
+    if (level.intro === 'oneWay') for (const p of fixed) if (p.oneWay) cells.push({ x: p.at[0], y: p.at[1] });
+    if (level.intro === 'station' || level.intro === 'order') {
+      const st = [...(level.stations ?? [])].sort((a, c) => (a.order ?? 0) - (c.order ?? 0))[0];
+      if (st) cells.push({ x: st.at[0], y: st.at[1] });
+    }
+    if (level.intro === 'rotation') for (const p of pieces) cells.push({ x: p.at[0], y: p.at[1] });
+    for (const c of cells) L.marks.append(s('rect', { class: 'intro-glow', x: c.x * CELL + 5, y: c.y * CELL + 5, width: 90, height: 90, rx: 16 }));
   }
 
   // ---------- pause (parent) ----------
@@ -672,9 +774,9 @@ export function mountLevel(root: HTMLElement, deps: LevelDeps): () => void {
     phase = 'build';
     touched();
     render();
-    if (level.intro) {
+    if (kindOf(level) === 'intro' && level.intro) {
       later(() => {
-        if (phase === 'build' && !correctPlaced() && !shownHint) showHint(true); // does not use a lamp
+        if (phase === 'build' && !correctPlaced()) glowIntro(); // no lamp, and no piece hint
       }, tm.introPromptMs);
     }
   }, tm.lookMs);

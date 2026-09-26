@@ -1,7 +1,8 @@
-// Board sizing. Pure, so the "tiles ≥ 64 px on a 360 × 640 phone" rule is unit-tested.
+// Board sizing. Pure, so the "tiles ≥ 56 px on a 360 × 640 phone" rule is unit-tested
+// (6 × 7 boards: 344 / 6 = 57 px across, 444 / 7 = 63 px down).
 // The CSS gives the top bar and the bottom bar exactly these heights.
 
-export const MIN_TILE = 64;
+export const MIN_TILE = 56;
 export const MAX_TILE = 104;
 export const TOP_BAR_PX = 76;
 export const BOTTOM_BAR_PX = 84;
