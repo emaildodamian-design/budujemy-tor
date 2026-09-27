@@ -62,7 +62,9 @@ export function plan(level: Level, pieces: readonly Placed[]): Plan {
     if (done && done.length > 0) {
       const target = gone[k - 1];
       const f = done.find((p) => sameAt(p.at, target.at)) ?? done[0];
-      return { hint: { type: 'change', cell: at(target), piece: f.piece, openings: f.openings }, completion: done };
+      // A walked-back piece the completion puts back exactly as it is stays: it is not "to lay".
+      const same = (p: Placed) => pieces.some((q) => sameAt(q.at, p.at) && q.piece === p.piece && q.openings === p.openings);
+      return { hint: { type: 'change', cell: at(target), piece: f.piece, openings: f.openings }, completion: done.filter((p) => !same(p)) };
     }
   }
 

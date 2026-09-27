@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { ghostPath, plan } from '../src/game/hints';
 import type { Level } from '../src/game/level';
 import { initialPieces } from '../src/game/level';
-import { LEVELS, levelById } from '../src/game/levels';
+import { LEVELS } from '../src/game/levels';
 import { autoOrientation, autoTurns, canPlace, drop, placeGhost, takeBack, trayView, turn } from '../src/game/placement';
 import { trace } from '../src/game/trace';
 import { P } from './helpers';
 
-const L = (id: string) => levelById(id)!;
+import v2 from './fixtures/v2_levels.json';
+
+// Placement rules are unit-tested on the small v2 boards (tests/fixtures/v2_levels.json);
+// the whole-set checks at the bottom run on the v3 levels.
+const L = (id: string) => (v2 as Level[]).find((l) => l.id === id)!;
 
 describe('laying pieces', () => {
   it('strict placement: incompatible terrain is refused (the piece floats back)', () => {
@@ -96,9 +100,10 @@ describe('auto orientation', () => {
     expect(order).toEqual(['SW', 'NW', 'NE', 'ES']);
   });
 
-  it('for every chapter 1–6 level, laying the solution cells in route order with auto rotation succeeds', () => {
+  it('for every auto-rotation level, laying the solution cells in route order succeeds', () => {
     // The auto rule is a convenience, not a solver: it must at least never fight a child who builds in order.
-    const autoLevels = LEVELS.filter((l: Level) => l.rotate === 'auto' && !l.preplaced);
+    const autoLevels = [...LEVELS, ...(v2 as Level[])].filter((l: Level) => l.rotate === 'auto' && !l.preplaced);
+    expect(autoLevels.filter((l) => LEVELS.includes(l)).map((l) => l.id)).toEqual(['L01', 'L02', 'L03']);
     for (const l of autoLevels) {
       let ps = initialPieces(l);
       for (const s of l.solution) {

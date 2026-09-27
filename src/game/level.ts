@@ -1,4 +1,4 @@
-// v2 level model: types, geometry helpers, terrain rules, mirroring and validation.
+// Level model: types, geometry helpers, terrain rules, mirroring and validation.
 // Pure: no DOM, no storage. Pieces have ABSOLUTE orientations (their two open sides),
 // unlike the v1 heading-relative tiles in grid.ts.
 
@@ -8,12 +8,18 @@ export type Side = 'N' | 'E' | 'S' | 'W';
 export type PieceKind = 'straight' | 'curve' | 'bridge' | 'tunnel';
 /** Two open sides in normalised order N,E,S,W. */
 export type Openings = 'NS' | 'EW' | 'NE' | 'ES' | 'SW' | 'NW';
-export type Intro = 'straight' | 'curve' | 'obstacle' | 'bridge' | 'tunnel' | 'station' | 'rotation' | 'repair';
+/** The element an intro level introduces. */
+export type Intro = 'rotation' | 'bridge' | 'tunnel' | 'station' | 'oneWay' | 'order' | 'repair';
+export type LevelKind = 'practice' | 'intro' | 'repair' | 'finale' | 'sibling';
 
 export interface PieceAt {
   at: [number, number];
   piece: PieceKind | 'station';
   openings: Openings;
+  /** Fixed one-way track: the train may only LEAVE the piece by this side (drawn as an arrow). */
+  oneWay?: Side;
+  /** Ordered stations: 1..3, drawn as dots on the roof. */
+  order?: number;
 }
 
 /** A movable piece on the board (laid by the player, or pre-laid on repair levels). */
@@ -23,14 +29,25 @@ export interface Placed {
   openings: Openings;
 }
 
+export interface Station {
+  at: [number, number];
+  openings: 'NS' | 'EW';
+  /** Either every station of a level has an order, or none does. */
+  order?: 1 | 2 | 3;
+}
+
 export interface Level {
   id: string;
   chapter: number;
+  /** Explicit in v3 (older level files are read as 'practice'). */
+  kind?: LevelKind;
+  /** Step-down levels: the main level they stand in for (ids like `L26s`). */
+  siblingOf?: string;
   intro?: Intro;
   grid: string[];
   start: { exit: Side };
   depot: { entry: Side };
-  stations?: { at: [number, number]; openings: 'NS' | 'EW' }[];
+  stations?: Station[];
   fixed?: PieceAt[];
   preplaced?: Placed[];
   tray: { piece: PieceKind; count: number }[];
@@ -40,13 +57,14 @@ export interface Level {
   solution: Placed[];
 }
 
-export type Terrain = 'grass' | 'rock' | 'house' | 'tree' | 'river' | 'mountain' | 'start' | 'depot' | 'station';
+export type Terrain = 'grass' | 'rock' | 'house' | 'tree' | 'lake' | 'river' | 'mountain' | 'start' | 'depot' | 'station';
 
 export const TERRAIN_CHARS: Record<string, Terrain> = {
   '.': 'grass',
   R: 'rock',
   H: 'house',
   T: 'tree',
+  L: 'lake',
   '~': 'river',
   '^': 'mountain',
   A: 'start',
@@ -58,8 +76,8 @@ export const PIECE_KINDS: readonly PieceKind[] = ['straight', 'curve', 'bridge',
 export const SIDES: readonly Side[] = ['N', 'E', 'S', 'W'];
 export const ALL_OPENINGS: readonly Openings[] = ['NS', 'EW', 'NE', 'ES', 'SW', 'NW'];
 
-export const MAX_COLS = 5;
-export const MAX_ROWS = 6;
+export const MAX_COLS = 6;
+export const MAX_ROWS = 7;
 
 export const sideDir = (s: Side): Dir => SIDES.indexOf(s) as Dir;
 export const dirSide = (d: Dir): Side => SIDES[d];
@@ -102,7 +120,7 @@ export function trayOrientation(kind: PieceKind): Openings {
   return kind === 'curve' ? 'ES' : 'EW';
 }
 
-/** Terrain rules: grass takes track, a river only a bridge, a mountain only a tunnel. */
+/** Terrain rules: grass takes track, a river only a bridge, a mountain only a tunnel, a lake nothing. */
 export function terrainAccepts(t: Terrain, piece: PieceKind | 'station'): boolean {
   switch (t) {
     case 'grass':
@@ -144,6 +162,8 @@ export interface Board {
   stations: Cell[];
   /** Everything the player owns: tray plus pre-laid movable pieces. */
   inventory: Counts;
+  /** Stations must be passed in their `order`. */
+  ordered: boolean;
 }
 
 const boards = new WeakMap<Level, Board>();
@@ -165,7 +185,7 @@ export function boardOf(level: Level): Board {
   if (cached) return cached;
   const fixed = new Map<string, PieceAt>();
   for (const p of level.fixed ?? []) fixed.set(`${p.at[0]},${p.at[1]}`, p);
-  for (const st of level.stations ?? []) fixed.set(`${st.at[0]},${st.at[1]}`, { at: st.at, piece: 'station', openings: st.openings });
+  for (const st of level.stations ?? []) fixed.set(`${st.at[0]},${st.at[1]}`, { at: st.at, piece: 'station', openings: st.openings, order: st.order });
   const inventory = zeroCounts();
   for (const t of level.tray) inventory[t.piece] += t.count;
   for (const p of level.preplaced ?? []) inventory[p.piece] += 1;
@@ -180,6 +200,7 @@ export function boardOf(level: Level): Board {
     fixed,
     stations: (level.stations ?? []).map((s) => cellOf(s.at)),
     inventory,
+    ordered: (level.stations ?? []).some((s) => s.order !== undefined),
   };
   boards.set(level, b);
   return b;
@@ -190,11 +211,14 @@ export function initialPieces(level: Level): Placed[] {
   return (level.preplaced ?? []).map((p) => ({ at: [p.at[0], p.at[1]], piece: p.piece, openings: p.openings }));
 }
 
+/** Chapters 1–4 show bridges and tunnels of the solution in the goal strip; from chapter 5 only stations. */
 export function goalStripOf(level: Level): 'full' | 'stations-only' {
-  return level.goalStrip ?? (level.chapter <= 5 ? 'full' : 'stations-only');
+  return level.goalStrip ?? (level.chapter <= 4 ? 'full' : 'stations-only');
 }
 
 export const isRepair = (level: Level) => (level.preplaced?.length ?? 0) > 0;
+export const kindOf = (level: Level): LevelKind => level.kind ?? (isRepair(level) ? 'repair' : level.intro ? 'intro' : 'practice');
+export const isSibling = (level: Level) => kindOf(level) === 'sibling';
 
 // ---------- mirroring (warm-ups and requeued levels) ----------
 
@@ -218,8 +242,8 @@ export function mirrorLevel(level: Level): Level {
     grid: level.grid.map((row) => [...row].reverse().join('')),
     start: { exit: mirrorSide(level.start.exit) },
     depot: { entry: mirrorSide(level.depot.entry) },
-    stations: level.stations?.map((s) => ({ at: [cols - 1 - s.at[0], s.at[1]] as [number, number], openings: s.openings })),
-    fixed: level.fixed?.map(mx),
+    stations: level.stations?.map((s) => ({ ...s, at: [cols - 1 - s.at[0], s.at[1]] as [number, number] })),
+    fixed: level.fixed?.map((p) => (p.oneWay ? { ...mx(p), oneWay: mirrorSide(p.oneWay) } : mx(p))),
     preplaced: level.preplaced?.map(mx),
     solution: level.solution.map(mx),
   };
@@ -231,8 +255,15 @@ export function mirrorLevel(level: Level): Level {
 export function validateLevel(level: Level): string[] {
   const errs: string[] = [];
   const e = (m: string) => errs.push(`${level.id}: ${m}`);
-  if (!/^L\d{2}$/.test(level.id)) e('bad id');
+  if (!/^L\d{2}s?$/.test(level.id)) e('bad id');
   if (!(level.chapter >= 1 && level.chapter <= 8)) e('bad chapter');
+  const kind = kindOf(level);
+  if (!['practice', 'intro', 'repair', 'finale', 'sibling'].includes(kind)) e('bad kind');
+  if ((kind === 'sibling') !== level.id.endsWith('s')) e('sibling ids end in s');
+  if (kind === 'sibling' && level.siblingOf !== level.id.slice(0, -1)) e('siblingOf must name the main level');
+  if (kind !== 'sibling' && level.siblingOf !== undefined) e('only siblings have siblingOf');
+  if ((kind === 'repair') !== isRepair(level)) e('repair levels (and only they) have pre-laid pieces');
+  if (kind === 'intro' && !level.intro) e('intro levels name their element');
   const rows = level.grid.length;
   const cols = level.grid[0]?.length ?? 0;
   if (rows < 1 || rows > MAX_ROWS || cols < 1 || cols > MAX_COLS) e(`board ${cols}x${rows} out of range`);
@@ -255,6 +286,11 @@ export function validateLevel(level: Level): string[] {
   const declared = new Set((level.stations ?? []).map((s) => `${s.at[0]},${s.at[1]}`));
   if (stationCells.size !== declared.size || [...stationCells].some((k) => !declared.has(k))) e('stations do not match S cells');
   for (const s of level.stations ?? []) if (s.openings !== 'NS' && s.openings !== 'EW') e('station openings must be NS or EW');
+  const orders = (level.stations ?? []).map((s) => s.order);
+  if (orders.some((o) => o !== undefined)) {
+    const want = orders.map((_, i) => i + 1);
+    if (orders.some((o) => o === undefined) || [...orders].sort().join() !== want.join()) e('station orders must be 1..n, on every station or none');
+  }
 
   const checkPiece = (p: PieceAt, what: string) => {
     const c = cellOf(p.at);
@@ -265,6 +301,10 @@ export function validateLevel(level: Level): string[] {
   for (const p of level.fixed ?? []) {
     checkPiece(p, 'fixed');
     if (!terrainAccepts(terrainAt(level, cellOf(p.at)), p.piece)) e('fixed piece on wrong terrain');
+    if (p.oneWay !== undefined) {
+      if (p.piece !== 'straight' && p.piece !== 'curve') e('only fixed straights and curves can be one-way');
+      if (!SIDES.includes(p.oneWay) || !p.openings.includes(p.oneWay)) e(`one-way side ${p.oneWay} is not an opening`);
+    }
   }
   for (const p of level.preplaced ?? []) {
     checkPiece(p, 'preplaced');

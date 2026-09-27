@@ -1,0 +1,634 @@
+{
+ "L01": {
+  "board": "5×4",
+  "minLen": 5,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L02": {
+  "board": "5×4",
+  "minLen": 7,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L03": {
+  "board": "5×5",
+  "minLen": 6,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L04": {
+  "board": "5×4",
+  "minLen": 5,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L05": {
+  "board": "5×5",
+  "minLen": 7,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 2,
+  "solutions": 2
+ },
+ "L06": {
+  "board": "5×5",
+  "minLen": 8,
+  "distractors": 1,
+  "planDepth": 3,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L07": {
+  "board": "5×5",
+  "minLen": 7,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 0,
+  "solutions": 1
+ },
+ "L08": {
+  "board": "5×6",
+  "minLen": 8,
+  "distractors": 2,
+  "planDepth": 2,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L09": {
+  "board": "5×5",
+  "minLen": 8,
+  "distractors": 2,
+  "planDepth": 3,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L10": {
+  "board": "5×6",
+  "minLen": 9,
+  "distractors": 1,
+  "planDepth": 3,
+  "detour": 6,
+  "solutions": 1
+ },
+ "L11": {
+  "board": "5×6",
+  "minLen": 8,
+  "distractors": 2,
+  "planDepth": 4,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L12": {
+  "board": "5×5",
+  "minLen": 7,
+  "distractors": 2,
+  "planDepth": 3,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L13": {
+  "board": "5×5",
+  "minLen": 10,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 8,
+  "solutions": 1
+ },
+ "L14": {
+  "board": "5×5",
+  "minLen": 9,
+  "distractors": 2,
+  "planDepth": 3,
+  "detour": 6,
+  "solutions": 1
+ },
+ "L15": {
+  "board": "5×5",
+  "minLen": 9,
+  "distractors": 3,
+  "planDepth": 3,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L16": {
+  "board": "5×5",
+  "minLen": 10,
+  "distractors": 1,
+  "planDepth": 3,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L17": {
+  "board": "5×5",
+  "minLen": 11,
+  "distractors": 2,
+  "planDepth": 4,
+  "detour": 10,
+  "solutions": 1
+ },
+ "L18": {
+  "board": "5×6",
+  "minLen": 12,
+  "distractors": 2,
+  "planDepth": 4,
+  "detour": 6,
+  "solutions": 1
+ },
+ "L19": {
+  "board": "5×6",
+  "minLen": 9,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 6,
+  "solutions": 1
+ },
+ "L20": {
+  "board": "6×6",
+  "minLen": 9,
+  "distractors": 2,
+  "planDepth": 3,
+  "detour": 5,
+  "solutions": 2
+ },
+ "L21": {
+  "board": "6×6",
+  "minLen": 10,
+  "distractors": 3,
+  "planDepth": 3,
+  "detour": 4,
+  "solutions": 2
+ },
+ "L22": {
+  "board": "6×6",
+  "minLen": 12,
+  "distractors": 2,
+  "planDepth": 4,
+  "detour": 7,
+  "solutions": 1
+ },
+ "L23": {
+  "board": "5×6",
+  "minLen": 12,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 7,
+  "solutions": 1
+ },
+ "L24": {
+  "board": "5×6",
+  "minLen": 11,
+  "distractors": 3,
+  "planDepth": 4,
+  "detour": 9,
+  "solutions": 2
+ },
+ "L25": {
+  "board": "6×6",
+  "minLen": 11,
+  "distractors": 3,
+  "planDepth": 4,
+  "detour": 10,
+  "solutions": 1
+ },
+ "L26": {
+  "board": "6×6",
+  "minLen": 11,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L27": {
+  "board": "6×6",
+  "minLen": 12,
+  "distractors": 4,
+  "planDepth": 5,
+  "detour": 4,
+  "solutions": 2
+ },
+ "L28": {
+  "board": "6×6",
+  "minLen": 12,
+  "distractors": 4,
+  "planDepth": 5,
+  "detour": 6,
+  "solutions": 2
+ },
+ "L29": {
+  "board": "6×6",
+  "minLen": 11,
+  "distractors": 4,
+  "planDepth": 6,
+  "detour": 10,
+  "solutions": 1
+ },
+ "L30": {
+  "board": "6×6",
+  "minLen": 14,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 10,
+  "solutions": 2
+ },
+ "L31": {
+  "board": "6×6",
+  "minLen": 9,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 3,
+  "solutions": 1
+ },
+ "L32": {
+  "board": "6×7",
+  "minLen": 12,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 5,
+  "solutions": 2
+ },
+ "L33": {
+  "board": "6×6",
+  "minLen": 12,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 5,
+  "solutions": 2
+ },
+ "L34": {
+  "board": "6×6",
+  "minLen": 13,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 10,
+  "solutions": 1
+ },
+ "L35": {
+  "board": "6×7",
+  "minLen": 11,
+  "distractors": 4,
+  "planDepth": 6,
+  "detour": 8,
+  "solutions": 2
+ },
+ "L36": {
+  "board": "6×6",
+  "minLen": 13,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 6,
+  "solutions": 1
+ },
+ "L37": {
+  "board": "6×6",
+  "minLen": 13,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 9,
+  "solutions": 2
+ },
+ "L38": {
+  "board": "6×6",
+  "minLen": 14,
+  "distractors": 4,
+  "planDepth": 5,
+  "detour": 12,
+  "solutions": 1
+ },
+ "L39": {
+  "board": "6×6",
+  "minLen": 13,
+  "distractors": 4,
+  "planDepth": 6,
+  "detour": 8,
+  "solutions": 1
+ },
+ "L40": {
+  "board": "6×6",
+  "minLen": 14,
+  "distractors": 4,
+  "planDepth": 7,
+  "detour": 9,
+  "solutions": 1
+ },
+ "L41": {
+  "board": "6×6",
+  "minLen": 15,
+  "distractors": 3,
+  "planDepth": 8,
+  "detour": 11,
+  "solutions": 2
+ },
+ "L42": {
+  "board": "6×7",
+  "minLen": 14,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 10,
+  "solutions": 1
+ },
+ "L43": {
+  "board": "6×7",
+  "minLen": 14,
+  "distractors": 5,
+  "planDepth": 6,
+  "detour": 9,
+  "solutions": 1
+ },
+ "L44": {
+  "board": "6×7",
+  "minLen": 15,
+  "distractors": 4,
+  "planDepth": 6,
+  "detour": 11,
+  "solutions": 1
+ },
+ "L45": {
+  "board": "6×7",
+  "minLen": 14,
+  "distractors": 5,
+  "planDepth": 7,
+  "detour": 10,
+  "solutions": 2
+ },
+ "L46": {
+  "board": "6×7",
+  "minLen": 15,
+  "distractors": 4,
+  "planDepth": 8,
+  "detour": 10,
+  "solutions": 1
+ },
+ "L47": {
+  "board": "6×7",
+  "minLen": 18,
+  "distractors": 5,
+  "planDepth": 9,
+  "detour": 11,
+  "solutions": 2
+ },
+ "L48": {
+  "board": "6×7",
+  "minLen": 16,
+  "distractors": 4,
+  "planDepth": 9,
+  "detour": 8,
+  "solutions": 1
+ },
+ "L08s": {
+  "board": "5×5",
+  "minLen": 6,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L09s": {
+  "board": "5×6",
+  "minLen": 5,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 2
+ },
+ "L10s": {
+  "board": "5×6",
+  "minLen": 6,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L11s": {
+  "board": "5×5",
+  "minLen": 5,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L14s": {
+  "board": "6×6",
+  "minLen": 6,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L15s": {
+  "board": "5×5",
+  "minLen": 6,
+  "distractors": 1,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L16s": {
+  "board": "5×5",
+  "minLen": 7,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 2
+ },
+ "L17s": {
+  "board": "5×5",
+  "minLen": 6,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L20s": {
+  "board": "6×6",
+  "minLen": 7,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L21s": {
+  "board": "5×6",
+  "minLen": 8,
+  "distractors": 1,
+  "planDepth": 1,
+  "detour": 7,
+  "solutions": 1
+ },
+ "L22s": {
+  "board": "5×6",
+  "minLen": 9,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L23s": {
+  "board": "6×6",
+  "minLen": 8,
+  "distractors": 1,
+  "planDepth": 3,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L25s": {
+  "board": "6×6",
+  "minLen": 8,
+  "distractors": 1,
+  "planDepth": 1,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L26s": {
+  "board": "6×6",
+  "minLen": 7,
+  "distractors": 1,
+  "planDepth": 2,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L27s": {
+  "board": "6×6",
+  "minLen": 5,
+  "distractors": 2,
+  "planDepth": 1,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L28s": {
+  "board": "6×6",
+  "minLen": 7,
+  "distractors": 2,
+  "planDepth": 3,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L29s": {
+  "board": "6×6",
+  "minLen": 8,
+  "distractors": 2,
+  "planDepth": 2,
+  "detour": 6,
+  "solutions": 1
+ },
+ "L32s": {
+  "board": "6×6",
+  "minLen": 8,
+  "distractors": 1,
+  "planDepth": 3,
+  "detour": 2,
+  "solutions": 1
+ },
+ "L33s": {
+  "board": "6×7",
+  "minLen": 6,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 3,
+  "solutions": 1
+ },
+ "L34s": {
+  "board": "6×6",
+  "minLen": 6,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 3,
+  "solutions": 1
+ },
+ "L35s": {
+  "board": "6×7",
+  "minLen": 7,
+  "distractors": 1,
+  "planDepth": 1,
+  "detour": 3,
+  "solutions": 1
+ },
+ "L38s": {
+  "board": "6×7",
+  "minLen": 12,
+  "distractors": 2,
+  "planDepth": 2,
+  "detour": 9,
+  "solutions": 1
+ },
+ "L39s": {
+  "board": "6×6",
+  "minLen": 11,
+  "distractors": 0,
+  "planDepth": 2,
+  "detour": 6,
+  "solutions": 1
+ },
+ "L40s": {
+  "board": "6×7",
+  "minLen": 12,
+  "distractors": 0,
+  "planDepth": 1,
+  "detour": 8,
+  "solutions": 2
+ },
+ "L41s": {
+  "board": "6×7",
+  "minLen": 11,
+  "distractors": 1,
+  "planDepth": 5,
+  "detour": 7,
+  "solutions": 1
+ },
+ "L43s": {
+  "board": "6×7",
+  "minLen": 7,
+  "distractors": 2,
+  "planDepth": 1,
+  "detour": 2,
+  "solutions": 2
+ },
+ "L44s": {
+  "board": "6×7",
+  "minLen": 13,
+  "distractors": 0,
+  "planDepth": 3,
+  "detour": 9,
+  "solutions": 1
+ },
+ "L45s": {
+  "board": "6×7",
+  "minLen": 12,
+  "distractors": 3,
+  "planDepth": 5,
+  "detour": 3,
+  "solutions": 1
+ },
+ "L46s": {
+  "board": "6×7",
+  "minLen": 13,
+  "distractors": 2,
+  "planDepth": 1,
+  "detour": 4,
+  "solutions": 1
+ },
+ "L47s": {
+  "board": "6×7",
+  "minLen": 11,
+  "distractors": 3,
+  "planDepth": 1,
+  "detour": 3,
+  "solutions": 2
+ },
+ "L48s": {
+  "board": "6×7",
+  "minLen": 12,
+  "distractors": 2,
+  "planDepth": 1,
+  "detour": 7,
+  "solutions": 1
+ }
+}

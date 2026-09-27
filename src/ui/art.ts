@@ -88,6 +88,13 @@ function base(cls: string): SVGRectElement {
 export function terrainArt(t: Terrain): SVGGElement {
   const g = s('g', { class: `terrain t-${t}` });
   switch (t) {
+    case 'lake':
+      // A round pond on the grass (the river is a full water tile with waves).
+      g.append(base('tile-grass'));
+      g.append(s('ellipse', { class: 'lake-water', cx: 50, cy: 52, rx: 42, ry: 36 }));
+      g.append(s('ellipse', { class: 'lake-shine', cx: 36, cy: 40, rx: 12, ry: 6 }));
+      g.append(s('path', { class: 'lily', d: 'M66 64 a9 9 0 1 0 0.1 0 Z M66 64 L74 58' }));
+      break;
     case 'river':
       g.append(base('tile-water'));
       g.append(s('path', { class: 'wave', d: 'M14 34 q9 -7 18 0 t18 0 M50 70 q9 -7 18 0 t18 0' }));
@@ -163,6 +170,33 @@ export function pieceArt(kind: PieceKind | 'station', o: Openings, opts: { movab
   return g;
 }
 
+/** One-way arrow on a fixed piece, pointing to the side the train must leave by. */
+export function arrowArt(exit: Dir): SVGGElement {
+  const g = s('g', { class: 'one-way', transform: `rotate(${[0, 90, 180, 270][exit]} 50 50)` });
+  g.append(s('circle', { class: 'arrow-disc', cx: 50, cy: 50, r: 24 }));
+  g.append(s('path', { class: 'arrow', d: 'M50 30 L66 50 H57 V68 H43 V50 H34 Z' }));
+  return g;
+}
+
+/** Ordered stations: 1–3 dots on the station roof (dots, not digits). */
+export function orderDots(order: number, o: Openings): SVGGElement {
+  const g = s('g', { class: 'order-dots' });
+  for (let i = 0; i < order; i++) {
+    const t = (i - (order - 1) / 2) * 12;
+    g.append(o === 'NS' ? s('circle', { class: 'order-dot', cx: 86, cy: 50 + t, r: 4.5 }) : s('circle', { class: 'order-dot', cx: 50 + t, cy: 86, r: 4.5 }));
+  }
+  return g;
+}
+
+/** First lamp: a small flag on the halfway cell of the remaining route. */
+export function flagArt(): SVGGElement {
+  const g = s('g', { class: 'half-flag' });
+  g.append(s('circle', { class: 'flag-glow', cx: 50, cy: 50, r: 40 }));
+  g.append(s('path', { class: 'flag-pole', d: 'M40 82 V20' }));
+  g.append(s('path', { class: 'flag-cloth', d: 'M42 20 L72 30 L42 42 Z' }));
+  return g;
+}
+
 /** Start shed: a little engine house open towards the exit, with a short stub of track. */
 export function startArt(exit: Dir): SVGGElement {
   const g = s('g', { class: 'start-shed' });
@@ -197,7 +231,7 @@ export function depotRoofArt(entry: Dir): SVGGElement {
   g.append(s('rect', { x: 40, y: 18, width: 20, height: 14, rx: 3, fill: '#8a4a36' }));
   const rot = [180, 270, 0, 90][entry];
   // Door arch on the side the train comes in, and the gate that stays shut if a station was missed.
-  g.append(s('rect', { x: 28, y: 84, width: 44, height: 12, rx: 6, fill: '#5b3a2e', transform: `rotate(${rot} 50 50)` }));
+  g.append(s('rect', { class: 'door-arch', x: 28, y: 84, width: 44, height: 12, rx: 6, fill: '#5b3a2e', transform: `rotate(${rot} 50 50)` }));
   g.append(s('path', { class: 'gate', d: 'M24 97 H76 M32 90 V100 M50 90 V100 M68 90 V100', transform: `rotate(${rot} 50 50)` }));
   return g;
 }

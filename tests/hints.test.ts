@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { type Hint, ghostPath, nextHint } from '../src/game/hints';
 import { type Level, type Placed, initialPieces, isRepair } from '../src/game/level';
-import { LEVELS } from '../src/game/levels';
+import { ALL_LEVELS as LEVELS } from '../src/game/levels';
 import { drop, pieceOn, takeBack } from '../src/game/placement';
 import { handFor, solve } from '../src/game/solver';
 import { trace } from '../src/game/trace';
 import { frozen, scatter, seeded } from './helpers';
+
+/** Random partial boards per level (v2: 200 on ≤ 5 × 6 boards; see the PR note on CI time). */
+const RANDOM_BOARDS = 200;
 
 /** Do what the hint says, the way a child with a helper would: one hint = one step. */
 function apply(level: Level, pieces: Placed[], h: Hint): Placed[] {
@@ -60,11 +63,11 @@ describe('6. hint completeness', () => {
     });
   }
 
-  it('from 200 random partial boards per level (seeded)', () => {
+  it(`from ${RANDOM_BOARDS} random partial boards per level and sibling (seeded)`, () => {
     const misses: string[] = [];
     for (const level of LEVELS) {
-      const rnd = seeded(level.id.charCodeAt(1) * 1000 + Number(level.id.slice(1)));
-      for (let i = 0; i < 200; i++) {
+      const rnd = seeded(level.id.charCodeAt(1) * 1000 + Number(level.id.slice(1, 3)) + (level.id.endsWith('s') ? 500 : 0));
+      for (let i = 0; i < RANDOM_BOARDS; i++) {
         const { pieces, wrong } = randomBoard(level, rnd);
         // Each wrong piece may cost one extra step (pointed at, then changed or taken back).
         const limit = level.solution.length + 2 + wrong;
@@ -73,13 +76,13 @@ describe('6. hint completeness', () => {
       }
     }
     expect(misses).toEqual([]);
-  });
+  }, 300_000);
 });
 
 describe('7. hint safety', () => {
   it('nextHint and ghostPath never remove, move or rotate existing pieces (property test)', () => {
     for (const level of LEVELS) {
-      const rnd = seeded(7_000 + Number(level.id.slice(1)));
+      const rnd = seeded(7_000 + Number(level.id.slice(1, 3)) + (level.id.endsWith('s') ? 500 : 0));
       for (let i = 0; i < 60; i++) {
         const { pieces } = randomBoard(level, rnd);
         const before = JSON.stringify(pieces);

@@ -10,41 +10,55 @@ import {
   cellOf,
   initialPieces,
   isRepair,
+  kindOf,
   mirrorLevel,
   terrainAccepts,
   terrainAt,
   validateLevel,
 } from '../src/game/level';
-import { LEVELS } from '../src/game/levels';
-import { countSolutions, countsOf, solve } from '../src/game/solver';
+import { ALL_LEVELS, LEVELS, SIBLINGS } from '../src/game/levels';
+import { minLenOf } from '../src/game/metrics';
+import { countSolutions, countsOf, solve, solverStats } from '../src/game/solver';
 import { trace } from '../src/game/trace';
-import { levelsReport } from './levelsReport';
+import { GIVEN } from './given';
+import { levelStats, levelsReport } from './levelsReport';
 
-const each = (fn: (l: Level) => void) => {
-  for (const l of LEVELS) it(l.id, () => fn(l));
+const each = (fn: (l: Level) => void, levels: readonly Level[] = ALL_LEVELS) => {
+  for (const l of levels) it(l.id, () => fn(l));
 };
 
 describe('level set', () => {
-  it('has 40 levels L01..L40 in order, chapters 1..8 non-decreasing', () => {
-    expect(LEVELS.map((l) => l.id)).toEqual(Array.from({ length: 40 }, (_, i) => `L${String(i + 1).padStart(2, '0')}`));
-    for (let i = 1; i < LEVELS.length; i++) expect(LEVELS[i].chapter).toBeGreaterThanOrEqual(LEVELS[i - 1].chapter);
-    expect(new Set(LEVELS.map((l) => l.chapter))).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8]));
+  it('has 48 main levels L01..L48 in order, 6 per chapter', () => {
+    expect(LEVELS.map((l) => l.id)).toEqual(Array.from({ length: 48 }, (_, i) => `L${String(i + 1).padStart(2, '0')}`));
+    LEVELS.forEach((l, i) => expect(l.chapter).toBe(Math.floor(i / 6) + 1));
   });
 
-  it('L01–L12 ship exactly as given (spot checks)', () => {
-    expect(LEVELS[0].grid).toEqual(['...', 'A.B', '...']);
-    expect(LEVELS[7].preplaced?.[2]).toEqual({ at: [2, 1], piece: 'straight', openings: 'EW' });
-    expect(LEVELS[11].start.exit).toBe('N');
+  it('L01–L04 ship exactly as given', () => {
+    expect(LEVELS.slice(0, 4)).toEqual(GIVEN);
   });
 
-  it('chapter settings follow the plan', () => {
-    for (const l of LEVELS) {
-      expect(l.rotate).toBe(l.chapter >= 7 ? 'free' : 'auto');
-      expect(l.placement).toBe(l.chapter >= 5 ? 'free' : 'strict');
-      expect(l.goalStrip ?? (l.chapter <= 5 ? 'full' : 'stations-only')).toBe(l.chapter <= 5 ? 'full' : 'stations-only');
+  it('kinds, rotation and placement follow the plan', () => {
+    const kind = (id: string) => kindOf(ALL_LEVELS.find((l) => l.id === id)!);
+    expect(LEVELS.filter((l) => kindOf(l) === 'intro').map((l) => `${l.id}:${l.intro}`)).toEqual(['L04:rotation', 'L07:bridge', 'L13:tunnel', 'L19:station', 'L31:oneWay', 'L37:order']);
+    expect(LEVELS.filter(isRepair).map((l) => l.id)).toEqual(['L12', 'L18', 'L24', 'L30', 'L36', 'L42']);
+    expect(LEVELS.filter((l) => kindOf(l) === 'repair').map((l) => l.id)).toEqual(['L12', 'L18', 'L24', 'L30', 'L36', 'L42']);
+    expect(kind('L48')).toBe('finale');
+    for (const l of ALL_LEVELS) {
+      const n = Number(l.id.slice(1, 3));
+      expect(l.rotate, l.id).toBe(n <= 3 ? 'auto' : 'free');
+      expect(l.placement, l.id).toBe(l.chapter === 1 || kindOf(l) === 'intro' ? 'strict' : 'free');
+      expect(l.goalStrip, l.id).toBeUndefined();
     }
-    expect(LEVELS.filter(isRepair).map((l) => l.id)).toEqual(['L08', 'L13', 'L18', 'L23', 'L29', 'L33', 'L37']);
-    expect(LEVELS.find((l) => l.id === 'L40')!.grid.join('')).toMatch(/(?=.*~)(?=.*\^)(?=.*S)(?=.*[RHT])/);
+  });
+
+  it('siblings: one per practice level and the finale of chapters 2–8, same chapter, never in the main sequence', () => {
+    const want = LEVELS.filter((l) => l.chapter >= 2 && (kindOf(l) === 'practice' || kindOf(l) === 'finale')).map((l) => `${l.id}s`);
+    expect(SIBLINGS.map((l) => l.id).sort()).toEqual(want.sort());
+    for (const s of SIBLINGS) {
+      const main = LEVELS.find((l) => l.id === s.siblingOf)!;
+      expect(s.chapter).toBe(main.chapter);
+      expect(kindOf(s)).toBe('sibling');
+    }
   });
 });
 
@@ -63,10 +77,23 @@ describe('1. schema', () => {
     const b = boardOf(l);
     expect(inBounds(step(b.start, b.startExit), b)).toBe(true);
     expect(inBounds(step(b.depot, b.depotEntry), b)).toBe(true);
+    const orders = (l.stations ?? []).map((s) => s.order);
+    expect(orders.every((o) => o === undefined) || orders.every((o) => o !== undefined)).toBe(true);
+  });
+
+  it('validation catches the v3 fields', () => {
+    const base = GIVEN[0];
+    expect(validateLevel({ ...base, id: 'L05x' })).toContain('L05x: bad id');
+    expect(validateLevel({ ...base, kind: 'sibling' }).join()).toMatch(/sibling ids end in s/);
+    expect(validateLevel({ ...base, fixed: [{ at: [4, 0], piece: 'straight', openings: 'NS', oneWay: 'E' }] }).join()).toMatch(/one-way side E is not an opening/);
+    const st = (order?: 1 | 2 | 3) => ({ at: [4, 0] as [number, number], openings: 'NS' as const, order });
+    const withSt = { ...base, grid: ['....S', ...base.grid.slice(1)] };
+    expect(validateLevel({ ...withSt, stations: [st(2)] }).join()).toMatch(/station orders/);
+    expect(validateLevel({ ...withSt, stations: [st(1)] })).toEqual([]);
   });
 });
 
-describe('2. the declared solution works', () => {
+describe('2. the declared solution works and is a shortest one', () => {
   each((l) => {
     expect(trace(l, l.solution).success).toBe(true);
     const inv = boardOf(l).inventory;
@@ -74,49 +101,39 @@ describe('2. the declared solution works', () => {
     for (const k of Object.keys(inv) as (keyof typeof inv)[]) expect(used[k]).toBeLessThanOrEqual(inv[k]);
     for (const p of l.solution) expect(terrainAccepts(terrainAt(l, cellOf(p.at)), p.piece)).toBe(true);
     expect(new Set(l.solution.map((p) => cellKey(cellOf(p.at)))).size).toBe(l.solution.length);
+    expect(l.solution.length).toBe(minLenOf(l));
   });
 });
 
 describe('3. every level is solvable by the solver from its initial state', () => {
   each((l) => {
-    // With everything the player owns (repair pieces can be moved), independently of `solution`.
     expect(solve(l, { cap: 1 }).length).toBe(1);
-    // And from the pre-laid state, by laying and swapping: the solution only needs owned pieces.
+    // From the pre-laid state too (repair: keep the correct pre-laid pieces, lay the rest).
     const pre = initialPieces(l);
-    const sol = solve(l, { cap: 1 })[0];
-    expect(sol.length + pre.length).toBeGreaterThan(0);
+    const right = pre.filter((p) => l.solution.some((s) => s.at[0] === p.at[0] && s.at[1] === p.at[1] && s.piece === p.piece && s.openings === p.openings));
+    expect(solve(l, { keep: right, cap: 1 }).length).toBe(1);
   });
 
-  it('LEVELS.md is generated and up to date', () => {
+  it('LEVELS.md and levelStats.json are generated and up to date', () => {
     const md = levelsReport();
-    if (process.env.UPDATE_LEVELS) writeFileSync('LEVELS.md', md);
+    const stats = levelStats();
+    if (process.env.UPDATE_LEVELS) {
+      writeFileSync('LEVELS.md', md);
+      writeFileSync('src/game/levelStats.json', stats);
+    }
     expect(existsSync('LEVELS.md')).toBe(true);
     expect(readFileSync('LEVELS.md', 'utf8')).toBe(md);
-  });
-});
-
-describe('4. intro levels are near-unique; chapters 1–5 have no distractors', () => {
-  each((l) => {
-    if (l.intro && l.intro !== 'repair') expect(countSolutions(l, 50)).toBeLessThanOrEqual(2);
-    if (l.chapter <= 5 && !isRepair(l)) expect(countsOf(l.solution)).toEqual(boardOf(l).inventory);
-  });
-
-  it('chapter intros (other than obstacle/station, which use 4×3) are 3×3 with an exact tray', () => {
-    for (const l of LEVELS.filter((x) => x.intro && !['obstacle', 'station', 'repair'].includes(x.intro))) {
-      expect([l.grid[0].length, l.grid.length]).toEqual([3, 3]);
-      expect(countsOf(l.solution)).toEqual(boardOf(l).inventory);
-    }
+    expect(readFileSync('src/game/levelStats.json', 'utf8')).toBe(stats);
   });
 });
 
 describe('5. repair levels', () => {
-  for (const l of LEVELS.filter(isRepair)) {
+  for (const l of ALL_LEVELS.filter(isRepair)) {
     it(`${l.id}: the pre-laid track fails its first test run, and swaps fix it`, () => {
       const pre = initialPieces(l);
       expect(trace(l, pre).success).toBe(false);
       const wrong = pre.filter((p) => !l.solution.some((s) => s.at[0] === p.at[0] && s.at[1] === p.at[1] && s.piece === p.piece && s.openings === p.openings));
       expect(wrong.length).toBeGreaterThanOrEqual(1);
-      // Keeping every correct pre-laid piece, the rest can be completed with what is owned.
       const keep = pre.filter((p) => !wrong.includes(p));
       expect(solve(l, { keep, cap: 1 }).length).toBe(1);
     });
@@ -130,7 +147,14 @@ describe('8. mirrored copies stay solvable', () => {
     expect(trace(m, m.solution).success).toBe(true);
     expect(solve(m, { cap: 1 }).length).toBe(1);
     expect(countSolutions(m, 50)).toBe(countSolutions(l, 50));
-    expect(mirrorLevel(m).grid).toEqual(l.grid);
+    expect(mirrorLevel(m)).toEqual(l);
     if (isRepair(l)) expect(trace(m, initialPieces(m)).success).toBe(false);
+    for (const [a, b] of (l.fixed ?? []).map((p, i) => [p, m.fixed![i]] as const)) {
+      if (a.oneWay) expect(b.oneWay).toBe(({ E: 'W', W: 'E', N: 'N', S: 'S' } as const)[a.oneWay]);
+    }
+  });
+
+  it('no search hit its node limit', () => {
+    expect(solverStats.truncated).toBe(0);
   });
 });
