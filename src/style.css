@@ -1045,3 +1045,218 @@ h3 {
   font-weight: 700;
   letter-spacing: 0.04em;
 }
+
+/* ---------- v4: program the train ---------- */
+.screen.game.prog {
+  gap: 6px;
+  padding: 8px;
+  --slot: 44px;
+  --pal: 56px;
+}
+.topbar4 {
+  height: 60px;
+}
+.topbar4 .topbar-mid {
+  flex: 1;
+}
+.lamp4 {
+  width: 48px;
+  height: 48px;
+}
+.lamp4 .lamp-art {
+  width: 40px;
+  height: 40px;
+}
+.run4 {
+  width: 56px;
+  height: 56px;
+}
+.prog-strip {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.prog-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+.prog-p {
+  padding-top: 4px;
+  border-top: 2px dashed #d8c7ec;
+}
+.slot {
+  position: relative;
+  width: var(--slot);
+  height: var(--slot);
+  flex: none;
+  padding: 3px;
+  border-radius: 10px;
+  border: 2px solid #b9ad97;
+  background: #fffaf0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.slot.empty {
+  border-style: dashed;
+  background: transparent;
+}
+.slot.selected {
+  box-shadow: 0 0 0 3px var(--parent-soft);
+  border-color: var(--parent);
+}
+/* Repeat bodies: a soft band under every slot inside a loop, capped at both ends. */
+.slot.in-1 {
+  background-color: #eef6e4;
+  border-color: #9cc27c;
+}
+.slot.in-2 {
+  background-color: #e3eefb;
+  border-color: #86aede;
+}
+.slot.empty.in-1,
+.slot.empty.in-2 {
+  background-color: transparent;
+}
+.slot.k-repeat {
+  border-color: #7fa35f;
+  background: #dcebc9;
+}
+.slot.opens-1,
+.slot.opens-2 {
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+  border-left-width: 4px;
+}
+.slot.closes-1,
+.slot.closes-2 {
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border-right-width: 4px;
+}
+.slot.p-marker {
+  border-color: #b79bd8;
+  background: #f3ecfb;
+}
+.slot.running {
+  box-shadow: 0 0 0 4px #fff3c4, 0 0 14px 4px #ffe28a;
+}
+.slot.culprit {
+  box-shadow: 0 0 0 4px #fff8e7, 0 0 16px 6px #ffe9b0;
+  animation: culprit-glow 2.4s ease-in-out infinite;
+}
+@keyframes culprit-glow {
+  50% {
+    box-shadow: 0 0 0 4px #fff8e7, 0 0 6px 2px #ffe9b0;
+  }
+}
+.cmd-svg {
+  width: 100%;
+  height: 100%;
+}
+.cmd-arrow {
+  fill: #4b6b8a;
+}
+.loop-line {
+  fill: none;
+  stroke: #5f8a3e;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+.loop-head {
+  fill: #5f8a3e;
+}
+.call-bg {
+  fill: #b79bd8;
+}
+.call-box {
+  fill: #fff;
+}
+.rep-count {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #fff;
+  border: 2px solid #7fa35f;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--ink);
+}
+.slot-mark {
+  position: absolute;
+  top: -12px;
+  width: 26px;
+  height: 26px;
+  z-index: 2;
+}
+.slot-mark.take-out {
+  right: -10px;
+}
+.slot-mark.grow {
+  left: -10px;
+}
+.slot-mark.shrink {
+  left: 18px;
+}
+.mark-svg {
+  width: 100%;
+  height: 100%;
+}
+.mark-disc {
+  fill: #fff;
+  stroke: #9ca3af;
+  stroke-width: 3;
+}
+.mark-line {
+  stroke: #475569;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.palette {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.pal-tile {
+  width: var(--pal);
+  height: var(--pal);
+  flex: none;
+  padding: 4px;
+  border-radius: 14px;
+  border: 2px solid #cbb89a;
+  background: #fffaf0;
+}
+.pal-tile.nope {
+  animation: nope 400ms ease;
+}
+@keyframes nope {
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+.riding .pal-tile,
+.riding .slot {
+  opacity: 0.8;
+}
+.cell-g.laid.faded {
+  opacity: 0.45;
+}
+.lamp-dot .dot-glow {
+  fill: rgb(255 236 170 / 0.55);
+}
+.lamp-dot .dot-core {
+  fill: #f6c64e;
+}

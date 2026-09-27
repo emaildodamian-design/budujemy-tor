@@ -14,7 +14,9 @@
     "icons": "node scripts/make-icons.mjs",
     "levels": "UPDATE_LEVELS=1 vitest run tests/levels.test.ts",
     "gen": "node scripts/run-ts.mjs scripts/gen-levels.ts",
-    "gen:set": "node scripts/run-ts.mjs scripts/build-set.ts"
+    "gen:set": "node scripts/run-ts.mjs scripts/build-set.ts",
+    "gen4": "node scripts/run-ts.mjs scripts/gen4.ts",
+    "levels4": "UPDATE_LEVELS=1 vitest run tests/levels4.test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",

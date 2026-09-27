@@ -1,17 +1,18 @@
-// App shell: setup (parent) → intro picture → a session of 4 puzzle levels → depot ride → END.
-// Locked until tomorrow afterwards. A hidden 3 s hold on the END / LOCKED heading (or on the
-// setup title) opens the parent menu: level preview, and on END / LOCKED the v2 unlock.
+// App shell: setup (parent) → intro picture → a session of N v4 puzzles (N = 2–5, parent
+// setting) → depot ride → END. Locked until tomorrow afterwards. A hidden 3 s hold on the
+// END / LOCKED heading (or on the setup title) opens the parent menu: level preview (v4, and
+// the v3 levels in their own section), and on END / LOCKED the v2 unlock.
 
 import './style.css';
 import { dayKey, isLocked, markSessionEnded, UNLOCKED } from './game/lock';
-import { ALL_LEVELS, LEVEL_COUNT } from './game/levels';
-import { type Bookmark, type SessionRun, SLOTS, endSession, finishLevel, levelForSlot, progressCount, startSession } from './game/progress';
+import { LEVEL_COUNT_V4, LEVELS_V4, levelById4 } from './game/levels4';
+import { type Bookmark4, type Session4, PUZZLE_COUNTS, finishPuzzle4, startSession4 } from './game/session4';
 import { type CardId, CARD_IDS, type Lang, LANGS, type T, translator } from './i18n';
 import { SoftAudio } from './platform/audio';
 import { deletePhoto, getPhoto, savePhoto, shrinkPhoto } from './platform/photos';
-import { type Settings, loadBookmark, loadLock, loadSettings, saveBookmark, saveLock, saveSettings } from './platform/settings';
+import { type Settings, loadBookmark, loadBookmark4, loadLock, loadSettings, saveBookmark, saveBookmark4, saveLock, saveSettings } from './platform/settings';
 import { cardIcon } from './ui/art';
-import { mountLevel } from './ui/game';
+import { mountPuzzle } from './ui/editor';
 import { showParentMenu } from './ui/parent';
 import { depotRideScene, introScene } from './ui/scenes';
 import { attachHold } from './ui/longpress';
@@ -122,16 +123,21 @@ async function showSetup() {
   const next = h('button', { class: 'btn primary big hold-start', type: 'button' }, t('start'));
   attachHold(next, () => showIntro(), 1500);
 
-  const bm = loadBookmark();
-  const recent = bm.log.length
-    ? h('p', { class: 'hint small' }, `${t('progressRecent')}: `, bm.log.map((l) => `${l.self} / ${l.helped}`).join(' · '))
-    : h('p', { class: 'hint small' }, t('progressNone'));
+  // How many new puzzles a session serves (v4).
+  const puzzlesRow = h('div', { class: 'segmented', role: 'radiogroup', 'aria-label': t('puzzles') });
+  for (const n of PUZZLE_COUNTS) {
+    const b = h('button', { type: 'button', role: 'radio', 'aria-checked': String(n === settings.puzzles), class: `puzzles-${n}${n === settings.puzzles ? ' on' : ''}` }, String(n));
+    b.addEventListener('click', () => update({ puzzles: n }));
+    puzzlesRow.append(b);
+  }
+
+  const bm = loadBookmark4();
   const progress = h(
     'section',
     { class: 'settings', 'aria-label': t('progress') },
     h('h3', {}, t('progress')),
-    h('div', { class: 'setting' }, h('span', {}, t('progressBoards')), h('strong', {}, `${progressCount(bm, LEVEL_COUNT)} / ${LEVEL_COUNT}`)),
-    recent,
+    h('div', { class: 'setting' }, h('span', {}, t('progressPuzzles')), h('strong', {}, `${Math.min(bm.next, LEVEL_COUNT_V4)} / ${LEVEL_COUNT_V4}`)),
+    bm.helped.length ? h('p', { class: 'hint small' }, `${t('lampUsed')}: ${bm.helped.join(', ')}`) : null,
   );
 
   // Hidden 3 s hold on the title: the parent menu (preview only; nothing to unlock here).
@@ -154,6 +160,7 @@ async function showSetup() {
         h('h3', {}, t('settings')),
         h('div', { class: 'setting' }, h('span', {}, t('sound')), soundBtn),
         h('div', { class: 'setting' }, h('span', {}, t('language')), langRow),
+        h('div', { class: 'setting' }, h('span', {}, t('puzzles')), puzzlesRow),
         h('p', { class: 'hint small' }, t('parentHoldHint')),
       ),
       progress,
@@ -172,12 +179,12 @@ function showIntro() {
   cleanup = scene.stop;
 }
 
-// ---------- a session: 4 slots ----------
+// ---------- a session: N puzzles ----------
 function showSession(t: T) {
   const card = settings.card;
   const day = dayKey(new Date());
-  let bm: Bookmark = loadBookmark();
-  let run: SessionRun = startSession(ALL_LEVELS, bm, day);
+  let bm: Bookmark4 = loadBookmark4();
+  let run: Session4 = startSession4(LEVELS_V4, bm, day, settings.puzzles);
   let ended = false;
   void keepAwake(true);
 
@@ -185,8 +192,6 @@ function showSession(t: T) {
     if (ended) return;
     ended = true;
     // Saved before the ride, so closing the app now does not re-open play today.
-    bm = endSession(bm, run, dayKey(new Date()));
-    saveBookmark(bm);
     saveLock(markSessionEnded(new Date()));
     const scene = depotRideScene(() => {
       void keepAwake(false);
@@ -199,20 +204,20 @@ function showSession(t: T) {
   const play = () => {
     const screen = h('div', { class: 'game-root' });
     show(screen);
-    cleanup = mountLevel(screen, {
+    cleanup = mountPuzzle(screen, {
       t,
       audio,
-      level: levelForSlot(ALL_LEVELS, run.current),
-      wagons: SLOTS - run.slot,
+      level: levelById4(run.current.id)!,
+      wagons: run.total - run.slot,
       onSolved: (result) => {
-        const r = finishLevel(ALL_LEVELS, bm, run, result);
+        const r = finishPuzzle4(LEVELS_V4, bm, run, result);
         bm = r.bm;
         run = r.run;
-        saveBookmark(bm);
+        saveBookmark4(bm);
         if (r.over) finish();
         else play();
       },
-      // Parent pause → end: the level in progress is not counted (the bookmark is unchanged).
+      // Parent pause → end: the puzzle in progress is not counted (the bookmark is unchanged).
       onEndSession: finish,
     });
   };
