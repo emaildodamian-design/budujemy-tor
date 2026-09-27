@@ -203,6 +203,12 @@ export function levelView(pl: ProgLevel): Level {
   return v;
 }
 
+/** v3 board facts of a v4 level, plus the v3 level view itself. */
+export function boardOfProg(pl: ProgLevel) {
+  const view = levelView(pl);
+  return { ...boardOf(view), view };
+}
+
 export const solutionOf = (pl: ProgLevel): Program => parseProgram(pl.solution);
 export const givenOf = (pl: ProgLevel): Program | null => (pl.given ? parseProgram(pl.given) : null);
 
@@ -572,7 +578,8 @@ export function runProgram(pl: ProgLevel, prog: Program): ProgRun {
   const tr = trace(v, c.pieces);
   const stepCmds = tr.path.map((_, i) => c.routeCmd[i] ?? []);
   const base = { path: tr.path, stepCmds, pieces: c.pieces, pieceCmd: c.pieceCmd, trace: tr };
-  if (tr.success) return { ...base, success: true, reason: null, breakCell: null, cmd: [], missingStations: [] };
+  // v3 trace cannot know that commands remain when the track reaches the depot: `early`.
+  if (tr.success && c.done) return { ...base, success: true, reason: null, breakCell: null, cmd: [], missingStations: [] };
   const stop = c.stop;
   if (!stop || tr.path.length < c.route.length) {
     // A v3 failure before the compiler's stop (never expected: both apply the same rules).

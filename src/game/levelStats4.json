@@ -1,1 +1,362 @@
-{}
+{
+ "P01": {
+  "board": "5×4",
+  "commands": "absolute",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 7,
+  "solutions": 3,
+  "guessRatio": 5461
+ },
+ "P02": {
+  "board": "5×6",
+  "commands": "absolute",
+  "slots": 8,
+  "fslots": 0,
+  "routeLen": 8,
+  "solutions": 1,
+  "guessRatio": 65536
+ },
+ "P03": {
+  "board": "6×5",
+  "commands": "absolute",
+  "slots": 9,
+  "fslots": 0,
+  "routeLen": 9,
+  "solutions": 2,
+  "guessRatio": 131072
+ },
+ "P04": {
+  "board": "5×6",
+  "commands": "absolute",
+  "slots": 9,
+  "fslots": 0,
+  "routeLen": 9,
+  "solutions": 1,
+  "guessRatio": 262144
+ },
+ "P05": {
+  "board": "5×6",
+  "commands": "absolute",
+  "slots": 10,
+  "fslots": 0,
+  "routeLen": 10,
+  "solutions": 1,
+  "guessRatio": 1048576
+ },
+ "P06": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 4,
+  "fslots": 0,
+  "routeLen": 9,
+  "solutions": 2,
+  "guessRatio": 1024
+ },
+ "P07": {
+  "board": "6×5",
+  "commands": "absolute",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 9,
+  "solutions": 2,
+  "guessRatio": 59392
+ },
+ "P08": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 10,
+  "solutions": 2,
+  "guessRatio": 59392
+ },
+ "P09": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 11,
+  "solutions": 1,
+  "guessRatio": 15360
+ },
+ "P10": {
+  "board": "6×5",
+  "commands": "absolute",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 12,
+  "solutions": 1,
+  "guessRatio": 15360
+ },
+ "P11": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 11,
+  "solutions": 1,
+  "guessRatio": 15360
+ },
+ "P12": {
+  "board": "6×5",
+  "commands": "absolute",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 11,
+  "solutions": 1,
+  "guessRatio": 15360
+ },
+ "P13": {
+  "board": "6×5",
+  "commands": "absolute",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 12,
+  "solutions": 1,
+  "guessRatio": 118784
+ },
+ "P14": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 2,
+  "guessRatio": 458752
+ },
+ "P15": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 14,
+  "solutions": 1,
+  "guessRatio": 118784
+ },
+ "P16": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 11,
+  "solutions": 1,
+  "guessRatio": 15360
+ },
+ "P17": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 1,
+  "guessRatio": 15360
+ },
+ "P18": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 2,
+  "guessRatio": 59392
+ },
+ "P19": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 1,
+  "guessRatio": 118784
+ },
+ "P20": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 8,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 2,
+  "guessRatio": 3538944
+ },
+ "P21": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 4,
+  "fslots": 0,
+  "routeLen": 9,
+  "solutions": 2,
+  "guessRatio": 436
+ },
+ "P22": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 12,
+  "solutions": 2,
+  "guessRatio": 105259
+ },
+ "P23": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 1,
+  "guessRatio": 210519
+ },
+ "P24": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 1,
+  "guessRatio": 210519
+ },
+ "P25": {
+  "board": "6×5",
+  "commands": "relative",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 15,
+  "solutions": 1,
+  "guessRatio": 210519
+ },
+ "P26": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 1,
+  "guessRatio": 13527
+ },
+ "P27": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 13,
+  "solutions": 1,
+  "guessRatio": 13527
+ },
+ "P28": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 0,
+  "routeLen": 15,
+  "solutions": 1,
+  "guessRatio": 13527
+ },
+ "P29": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 15,
+  "solutions": 2,
+  "guessRatio": 452587
+ },
+ "P30": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 16,
+  "solutions": 1,
+  "guessRatio": 111033
+ },
+ "P31": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 3,
+  "routeLen": 14,
+  "solutions": 1,
+  "guessRatio": 2073600
+ },
+ "P32": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 3,
+  "routeLen": 14,
+  "solutions": 2,
+  "guessRatio": 1036800
+ },
+ "P33": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 3,
+  "routeLen": 15,
+  "solutions": 2,
+  "guessRatio": 1036800
+ },
+ "P34": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 3,
+  "routeLen": 18,
+  "solutions": 1,
+  "guessRatio": 2073600
+ },
+ "P35": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 3,
+  "routeLen": 18,
+  "solutions": 3,
+  "guessRatio": 691200
+ },
+ "P36": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 12,
+  "solutions": 1,
+  "guessRatio": 917504
+ },
+ "P37": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 5,
+  "fslots": 3,
+  "routeLen": 14,
+  "solutions": 2,
+  "guessRatio": 1036800
+ },
+ "P38": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 7,
+  "fslots": 0,
+  "routeLen": 15,
+  "solutions": 2,
+  "guessRatio": 452587
+ },
+ "P39": {
+  "board": "6×6",
+  "commands": "absolute",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 16,
+  "solutions": 1,
+  "guessRatio": 118784
+ },
+ "P40": {
+  "board": "6×6",
+  "commands": "relative",
+  "slots": 6,
+  "fslots": 0,
+  "routeLen": 17,
+  "solutions": 1,
+  "guessRatio": 111033
+ }
+}

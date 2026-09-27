@@ -38,9 +38,9 @@ describe('no network, no tracking, no notifications (safeguards 4 & 7)', () => {
     expect(sw).toMatch(/req\.method !== 'GET' \|\| url\.origin !== self\.location\.origin\) return;/);
   });
 
-  it('v3 bumps the service-worker cache name, and old caches are cleared on activate', () => {
+  it('v4 bumps the service-worker cache name (v3: budujemy-tor-v3-*), and old caches are cleared on activate', () => {
     const sw = readFileSync('sw/sw.template.js', 'utf8');
-    expect(sw).toContain('const CACHE = `budujemy-tor-v3-${VERSION}`;');
+    expect(sw).toContain('const CACHE = `budujemy-tor-v4-${VERSION}`;');
     expect(sw).toMatch(/k\.startsWith\('budujemy-tor-'\) && k !== CACHE/);
   });
 
@@ -119,6 +119,10 @@ describe('parent menu stays hidden (next-day lock)', () => {
     const parent = readFileSync('src/ui/parent.ts', 'utf8');
     expect(parent.match(/saveBookmark\(/g)).toHaveLength(1);
     expect(parent).toMatch(/deps\.saveBookmark\(setNextLevel\(/);
+    // v4: the same, for the v4 bookmark.
+    expect(parent.match(/saveBookmark4\(/g)).toHaveLength(1);
+    expect(parent).toMatch(/saveBookmark4\(setNextLevel4\(/);
+    expect(parent).not.toMatch(/finishPuzzle4|startSession4/);
     expect(parent).not.toMatch(/localStorage|saveLock|saveSettings|endSession|finishLevel/);
   });
 });
