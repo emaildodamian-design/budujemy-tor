@@ -4,6 +4,7 @@
 import type { LockState } from '../game/lock';
 import { UNLOCKED } from '../game/lock';
 import { type Bookmark, parseBookmark } from '../game/progress';
+import { type Bookmark4, type PuzzleCount, DEFAULT_PUZZLES, parseBookmark4, parsePuzzles } from '../game/session4';
 import { type CardId, CARD_IDS, type Lang, LANGS } from '../i18n';
 
 export interface Settings {
@@ -11,13 +12,17 @@ export interface Settings {
   /** Sound is OFF by default. */
   sound: boolean;
   card: CardId;
+  /** v4: new puzzles per session (2–5). */
+  puzzles: PuzzleCount;
 }
 
-export const DEFAULT_SETTINGS: Settings = { lang: 'pl', sound: false, card: 'bath' };
+export const DEFAULT_SETTINGS: Settings = { lang: 'pl', sound: false, card: 'bath', puzzles: DEFAULT_PUZZLES };
 
 const SETTINGS_KEY = 'budujemy-tor:settings';
 const LOCK_KEY = 'budujemy-tor:lock';
 const BOOKMARK_KEY = 'budujemy-tor:bookmark';
+/** v4 has its own bookmark; the v3 one is kept as it is. */
+export const BOOKMARK4_KEY = 'budujemy-tor:bookmark4';
 
 /** Parse stored settings, falling back to safe defaults for anything unknown. */
 export function parseSettings(raw: string | null): Settings {
@@ -31,6 +36,7 @@ export function parseSettings(raw: string | null): Settings {
     lang: LANGS.includes(v.lang as Lang) ? (v.lang as Lang) : DEFAULT_SETTINGS.lang,
     sound: v.sound === true,
     card: CARD_IDS.includes(v.card as CardId) ? (v.card as CardId) : DEFAULT_SETTINGS.card,
+    puzzles: parsePuzzles(v.puzzles),
   };
 }
 
@@ -65,3 +71,5 @@ export const loadLock = (): LockState => parseLock(read(LOCK_KEY));
 export const saveLock = (l: LockState): void => write(LOCK_KEY, l);
 export const loadBookmark = (): Bookmark => parseBookmark(read(BOOKMARK_KEY));
 export const saveBookmark = (b: Bookmark): void => write(BOOKMARK_KEY, b);
+export const loadBookmark4 = (): Bookmark4 => parseBookmark4(read(BOOKMARK4_KEY));
+export const saveBookmark4 = (b: Bookmark4): void => write(BOOKMARK4_KEY, b);
